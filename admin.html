@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>True Corporation | Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .premium-card { box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.04); border: 1px solid #f1f5f9; }
+        
+        input[type="datetime-local"], input[type="number"] { font-family: 'Sarabun', sans-serif; }
+        ::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
+    </style>
+</head>
+<body class="text-slate-800 h-screen flex flex-col overflow-hidden">
+
+    <header class="bg-white border-b border-slate-200 py-4 px-6 md:px-8 shrink-0 flex justify-between items-center z-20 relative">
+        <div class="flex items-center gap-5 relative z-10">
+            <img src="https://img2.pic.in.th/True--C.png" class="h-8 md:h-10 w-auto" alt="True Logo">
+            <div class="h-10 w-px bg-slate-200 hidden md:block"></div>
+            <div>
+                <h1 class="text-lg md:text-xl font-bold text-slate-800 leading-tight">Admin Dashboard</h1>
+                <p class="text-[11px] md:text-xs text-slate-500 font-medium tracking-wide mt-0.5">FC Meeting Quiz Overview</p>
+            </div>
+        </div>
+
+        <div id="countdownContainer" class="hidden lg:flex flex-col items-center justify-center absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none w-full">
+            <div id="countdownDisplay" class="text-2xl xl:text-3xl font-black text-red-600 bg-red-50 px-8 py-2 rounded-xl border-2 border-red-100 shadow-md min-w-[260px] text-center tracking-widest pointer-events-auto">
+                กำลังคำนวณเวลา...
+            </div>
+            <p class="text-[13px] font-bold text-slate-600 uppercase tracking-widest mt-2 bg-white/90 px-5 py-1 rounded-full shadow-sm border border-slate-100 pointer-events-auto">สิ้นสุดการสอบ: <span id="endDateDisplay" class="text-slate-900 font-black text-[14px] ml-1">-</span></p>
+        </div>
+
+        <div class="flex items-center gap-3 md:gap-5 relative z-10">
+            <button onclick="promptTimePassword()" class="flex items-center gap-2 px-3 py-2.5 md:px-4 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition-all border border-slate-200 shadow-sm pointer-events-auto group">
+                <svg class="w-5 h-5 text-slate-400 group-hover:text-slate-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span class="hidden md:inline">ตั้งค่าระบบ</span>
+            </button>
+
+            <button onclick="loadDashboardData()" class="flex items-center gap-2 px-3 py-2.5 md:px-4 bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 rounded-lg text-sm font-semibold transition-colors border border-slate-200 hover:border-red-200 shadow-sm pointer-events-auto">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <span class="hidden md:inline">รีเฟรช</span>
+            </button>
+        </div>
+    </header>
+
+    <div id="mobileCountdownContainer" class="lg:hidden bg-slate-50 border-b border-slate-200 px-6 py-4 flex flex-col justify-center items-center gap-1.5 shrink-0 shadow-inner hidden">
+        <span id="mobCountdownDisplay" class="text-red-600 font-black bg-red-100 px-4 py-1.5 rounded-lg shadow-sm tracking-widest text-lg border border-red-200 w-full text-center">...</span>
+        <span class="text-slate-600 font-bold uppercase text-[11px] tracking-widest mt-0.5">สิ้นสุดการสอบ: <span id="mobEndDateDisplay" class="text-slate-900 font-black text-xs ml-1">-</span></span>
+    </div>
+
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+        <div class="max-w-6xl mx-auto space-y-6 md:space-y-8 pb-10">
+            <div id="loadingState" class="flex flex-col items-center justify-center py-32">
+                <div class="relative w-12 h-12 mb-4">
+                    <div class="absolute inset-0 rounded-full border-[3px] border-slate-100"></div>
+                    <div class="absolute inset-0 rounded-full border-[3px] border-transparent border-t-red-600 animate-spin"></div>
+                </div>
+                <p class="text-slate-500 font-medium text-sm">กำลังโหลดข้อมูลระบบ...</p>
+            </div>
+
+            <div id="dashboardContent" class="hidden space-y-6 md:space-y-8 animate-[fade-in-up_0.4s_ease-out]">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                    <div class="bg-white rounded-2xl p-6 premium-card flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-600 shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">เข้าสอบแล้ว / เป้าหมาย</p>
+                            <div class="flex items-baseline gap-1.5">
+                                <span class="text-3xl font-extrabold text-slate-800" id="valTested">0</span>
+                                <span class="text-sm font-semibold text-slate-400">/ <span id="valTarget">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 premium-card flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">สัดส่วนผู้เข้าสอบ</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-3xl font-extrabold text-slate-800" id="valPercent">0</span>
+                                <span class="text-base font-bold text-slate-400">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 premium-card flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-600 shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">คะแนนเฉลี่ย</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-3xl font-extrabold text-slate-800" id="valAvgScore">0</span>
+                                <span class="text-sm font-semibold text-slate-400">คะแนน</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+                    
+                    <div class="lg:col-span-2 bg-white rounded-2xl p-6 md:p-8 premium-card">
+                        <div class="mb-6 pb-4 border-b border-slate-100 flex items-center justify-between">
+                            <div>
+                                <h2 class="text-lg font-bold text-slate-800">ความคืบหน้าแยกตามช่องทาง</h2>
+                                <p class="text-xs text-slate-500 mt-1">Completion Progress by Channel</p>
+                            </div>
+                        </div>
+                        <div id="channelList" class="space-y-6"></div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 md:p-8 premium-card h-fit flex flex-col">
+                        <div class="mb-6 pb-4 border-b border-slate-100">
+                            <h2 class="text-lg font-bold text-slate-800">ส่งออกข้อมูล (Export)</h2>
+                            <p class="text-xs text-slate-500 mt-1">Download Reports to Excel</p>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <button onclick="exportFile('downloadResultsExcel')" id="btnResult" class="w-full bg-red-600 hover:bg-red-700 text-white p-4 rounded-xl font-bold text-sm transition-colors duration-200 shadow-sm flex items-center gap-3 group">
+                                <div class="bg-white/20 p-2.5 rounded-lg shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                </div>
+                                <div class="text-left flex-1">
+                                    <span class="block text-[15px] flex items-center gap-1.5">
+                                        สรุปผลการสอบ 
+                                        <svg class="w-3.5 h-3.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                    </span>
+                                    <span class="block text-[11px] font-normal text-red-100 mt-0.5">คะแนนเฉลี่ย/เกณฑ์ผ่าน (ต้องใช้รหัส)</span>
+                                </div>
+                            </button>
+
+                            <div class="pt-2">
+                                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">ดาวน์โหลดแบบแยกช่องทาง</label>
+                                
+                                <div class="relative mb-3">
+                                    <select id="channelSelect" class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm font-medium rounded-xl pl-4 pr-10 py-3.5 outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition cursor-pointer appearance-none">
+                                        <option value="All">รวมทุกช่องทาง (All Channels)</option>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </div>
+                                </div>
+
+                                <button onclick="exportTracking()" id="btnTrack" class="w-full bg-white border border-slate-200 hover:border-red-500 text-slate-700 hover:text-red-600 p-4 rounded-xl font-bold text-sm transition-colors duration-200 shadow-sm flex items-center gap-3 group">
+                                    <div class="bg-slate-50 group-hover:bg-red-50 p-2.5 rounded-lg shrink-0 text-slate-400 group-hover:text-red-500 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    </div>
+                                    <div class="text-left flex-1">
+                                        <span class="block text-[15px]">ติดตามพนักงาน</span>
+                                        <span class="block text-[11px] font-normal text-slate-400 group-hover:text-red-400 mt-0.5">รายชื่อคนที่ยังไม่ได้เข้าสอบ</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="timeSettingsModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    ตั้งค่าระบบการสอบ
+                </h3>
+                <button onclick="closeTimeModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="p-6 space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">วันและเวลา เริ่มต้น (Start Time)</label>
+                    <input type="datetime-local" id="inputStartTime" class="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">วันและเวลา สิ้นสุด (End Time)</label>
+                    <input type="datetime-local" id="inputEndTime" class="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm">
+                </div>
+                <div class="pt-2 border-t border-slate-100">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2 mt-2">จำกัดโควต้าการสอบ (จำนวนครั้ง/คน)</label>
+                    <input type="number" id="inputMaxAttempts" min="1" placeholder="เช่น 1 หรือ 3" class="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm">
+                    <p class="text-[11px] text-slate-400 mt-1">พนักงานที่สอบครบโควต้าแล้ว ระบบจะไม่อนุญาตให้เข้าสอบอีก</p>
+                </div>
+            </div>
+
+            <div class="px-6 py-5 border-t border-slate-100 bg-slate-50 flex gap-3 justify-end">
+                <button onclick="closeTimeModal()" class="px-5 py-2.5 rounded-xl font-semibold text-slate-600 hover:bg-slate-200 transition-colors">ยกเลิก</button>
+                <button onclick="saveTimeSettings()" id="btnSaveTime" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold shadow-md transition-colors flex items-center gap-2">
+                    บันทึกการตั้งค่า
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx6Qq3EJQ41GWV5wzK3_h8rSjpZkvUVl7GHXIEJ2zdl-Iu5GyUBMOJDJud5ywMe1z5lZQ/exec"; 
+        let countdownInterval;
+        let globalSettings = null; 
+
+        async function fetchGAS(action, args = []) {
+            const response = await fetch(GAS_WEB_APP_URL, {
+                method: 'POST', body: JSON.stringify({ action: action, args: args })
+            });
+            const data = await response.json();
+            if (data.error) throw new Error(data.error);
+            return data.result;
+        }
+
+        window.onload = loadDashboardData;
+
+        async function loadDashboardData() {
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('dashboardContent').classList.add('hidden');
+
+            try {
+                const [data, settings] = await Promise.all([
+                    fetchGAS('getAdminDashboardData'),
+                    fetchGAS('getQuizSettings')
+                ]);
+                
+                globalSettings = settings; 
+                document.getElementById('valTested').innerText = data.totalTested.toLocaleString();
+                document.getElementById('valTarget').innerText = data.totalTarget.toLocaleString();
+                document.getElementById('valPercent').innerText = data.percentTotal;
+                document.getElementById('valAvgScore').innerText = data.avgScore;
+
+                const channelContainer = document.getElementById('channelList');
+                const channelSelect = document.getElementById('channelSelect');
+                channelContainer.innerHTML = '';
+                channelSelect.innerHTML = '<option value="All">รวมทุกช่องทาง (All Channels)</option>';
+                
+                let chArray = [];
+                for (let ch in data.channelStats) {
+                    const stats = data.channelStats[ch];
+                    const pct = stats.target > 0 ? Math.round((stats.tested / stats.target) * 100) : 0;
+                    chArray.push({ name: ch, tested: stats.tested, target: stats.target, percent: pct });
+                }
+                chArray.sort((a, b) => b.percent - a.percent);
+
+                chArray.forEach(ch => {
+                    channelContainer.innerHTML += `
+                        <div>
+                            <div class="flex justify-between items-end text-sm font-semibold text-slate-700 mb-2">
+                                <span>${ch.name} <span class="text-slate-400 font-medium ml-1">(${ch.tested}/${ch.target})</span></span>
+                                <span class="text-red-600 font-bold">${ch.percent}%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                <div class="bg-red-600 h-full rounded-full transition-all duration-1000 ease-out" style="width: ${ch.percent}%"></div>
+                            </div>
+                        </div>
+                    `;
+                    channelSelect.innerHTML += `<option value="${ch.name}">${ch.name}</option>`;
+                });
+
+                setupCountdown(settings.endDate);
+
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('dashboardContent').classList.remove('hidden');
+            } catch (err) {
+                alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + err.message);
+                document.getElementById('loadingState').innerHTML = `<p class="text-red-500 font-bold text-center text-sm">โหลดข้อมูลไม่สำเร็จ<br><button onclick="loadDashboardData()" class="mt-3 underline text-slate-500 hover:text-red-600">ลองใหม่อีกครั้ง</button></p>`;
+            }
+        }
+
+        function setupCountdown(endDateStr) {
+            if(countdownInterval) clearInterval(countdownInterval);
+            
+            const containerDesk = document.getElementById('countdownContainer');
+            const displayDesk = document.getElementById('countdownDisplay');
+            const dateDesk = document.getElementById('endDateDisplay');
+            
+            const containerMob = document.getElementById('mobileCountdownContainer');
+            const displayMob = document.getElementById('mobCountdownDisplay');
+            const dateMob = document.getElementById('mobEndDateDisplay');
+
+            if (!endDateStr) {
+                containerDesk.classList.remove('hidden');
+                containerMob.classList.remove('hidden');
+                dateDesk.innerText = 'ไม่มีกำหนด';
+                dateMob.innerText = 'ไม่มีกำหนด';
+                
+                const activeClassDesk = 'text-2xl xl:text-3xl font-black text-green-600 bg-green-50 px-8 py-2 rounded-xl border-2 border-green-100 shadow-md min-w-[260px] text-center tracking-widest pointer-events-auto';
+                displayDesk.innerText = 'เปิดระบบตลอดเวลา';
+                displayDesk.className = activeClassDesk;
+                displayMob.innerText = 'เปิดตลอดเวลา';
+                displayMob.className = 'text-green-600 font-black bg-green-100 px-4 py-1.5 rounded-lg shadow-sm tracking-widest text-lg border border-green-200 w-full text-center';
+                return;
+            }
+
+            const endDate = new Date(endDateStr);
+            containerDesk.classList.remove('hidden');
+            containerMob.classList.remove('hidden');
+            
+            const formattedDate = endDate.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
+            dateDesk.innerText = formattedDate + ' น.';
+            dateMob.innerText = formattedDate + ' น.';
+
+            countdownInterval = setInterval(() => {
+                const now = new Date();
+                const diff = endDate - now;
+
+                if (diff <= 0) {
+                    clearInterval(countdownInterval);
+                    const endText = 'หมดเวลาทำแบบทดสอบ';
+                    const endClassDesk = 'text-2xl xl:text-3xl font-black text-slate-500 bg-slate-100 px-8 py-2 rounded-xl border-2 border-slate-200 shadow-md min-w-[260px] text-center tracking-widest pointer-events-auto';
+                    const endClassMob = 'text-slate-600 font-black bg-slate-200 px-4 py-1.5 rounded-lg shadow-sm text-lg border border-slate-300 w-full text-center';
+                    
+                    displayDesk.innerText = endText;
+                    displayDesk.className = endClassDesk;
+                    displayMob.innerText = 'หมดเวลาสอบ';
+                    displayMob.className = endClassMob;
+                } else {
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const secs = Math.floor((diff % (1000 * 60)) / 1000);
+                    
+                    let timeStr = '';
+                    if(days > 0) timeStr += `${days} วัน `;
+                    timeStr += `${hours.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')} ชม.`;
+                    
+                    const activeClassDesk = 'text-2xl xl:text-3xl font-black text-red-600 bg-red-50 px-8 py-2 rounded-xl border-2 border-red-100 shadow-md min-w-[260px] text-center tracking-widest pointer-events-auto';
+                    const activeClassMob = 'text-red-600 font-black bg-red-100 px-4 py-1.5 rounded-lg shadow-sm tracking-widest text-lg border border-red-200 w-full text-center';
+
+                    displayDesk.innerText = `⏳ ${timeStr}`;
+                    displayDesk.className = activeClassDesk;
+                    displayMob.innerText = `⏳ ${timeStr}`;
+                    displayMob.className = activeClassMob;
+                }
+            }, 1000);
+        }
+
+        function formatToDatetimeLocal(dateStr) {
+            if (!dateStr) return "";
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return "";
+            const tzOffset = (new Date()).getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(d.getTime() - tzOffset)).toISOString().slice(0, 16);
+            return localISOTime;
+        }
+
+        // 📌 ระบบความปลอดภัย: ใส่รหัสผ่าน True7201
+        function promptTimePassword() {
+            const password = prompt("🔐 การตั้งค่าระบบสงวนสิทธิ์เฉพาะ Admin\nกรุณากรอกรหัสผ่านเพื่อดำเนินการต่อ:");
+            if (password === "True7201") {
+                openTimeModal();
+            } else if (password !== null) {
+                alert("❌ รหัสผ่านไม่ถูกต้อง");
+            }
+        }
+
+        function openTimeModal() {
+            const modal = document.getElementById('timeSettingsModal');
+            if (globalSettings) {
+                document.getElementById('inputStartTime').value = formatToDatetimeLocal(globalSettings.startDate);
+                document.getElementById('inputEndTime').value = formatToDatetimeLocal(globalSettings.endDate);
+                document.getElementById('inputMaxAttempts').value = globalSettings.maxAttempts || 1; // ดึงโควต้ามาแสดง
+            }
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeTimeModal() {
+            const modal = document.getElementById('timeSettingsModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        async function saveTimeSettings() {
+            const startVal = document.getElementById('inputStartTime').value;
+            const endVal = document.getElementById('inputEndTime').value;
+            const maxAttVal = document.getElementById('inputMaxAttempts').value; // รับค่าโควต้า
+
+            if (!startVal || !endVal || !maxAttVal) {
+                alert("⚠️ กรุณาระบุข้อมูลให้ครบถ้วน");
+                return;
+            }
+
+            const newStart = new Date(startVal).toISOString();
+            const newEnd = new Date(endVal).toISOString();
+
+            if (new Date(newStart) >= new Date(newEnd)) {
+                alert("⚠️ เวลาสิ้นสุด ต้องมากกว่า เวลาเริ่มต้น");
+                return;
+            }
+
+            const btn = document.getElementById('btnSaveTime');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> กำลังบันทึก...`;
+            btn.disabled = true;
+
+            try {
+                // ส่งค่าที่ 3 (โควต้า) กลับไปเซฟใน Google Sheet
+                const result = await fetchGAS('updateQuizSettings', [newStart, newEnd, maxAttVal]);
+                
+                if (result.success) {
+                    alert("✅ บันทึกการตั้งค่าเรียบร้อยแล้ว!");
+                    closeTimeModal();
+                    loadDashboardData();
+                } else {
+                    alert("❌ เกิดข้อผิดพลาด: " + result.message);
+                }
+            } catch (err) {
+                alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อ: " + err.message);
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        }
+
+        function exportTracking() {
+            const selectedChannel = document.getElementById('channelSelect').value;
+            exportFile('downloadTrackingExcel', [selectedChannel]);
+        }
+
+        async function exportFile(actionName, args = []) {
+            if (actionName === 'downloadResultsExcel') {
+                const password = prompt("กรุณากรอกรหัสผ่านเพื่อยืนยันการดาวน์โหลด (สรุปผลการสอบ):");
+                if (password !== "FC2026") {
+                    if (password !== null) { 
+                        alert("❌ รหัสผ่านไม่ถูกต้อง ไม่อนุญาตให้ดาวน์โหลดข้อมูล");
+                    }
+                    return; 
+                }
+            }
+
+            const btnId = actionName === 'downloadTrackingExcel' ? 'btnTrack' : 'btnResult';
+            const btn = document.getElementById(btnId);
+            const originalHtml = btn.innerHTML;
+            
+            if (actionName === 'downloadResultsExcel') {
+                btn.innerHTML = `<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mx-auto"></div>`;
+            } else {
+                btn.innerHTML = `<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-red-500 mx-auto"></div>`;
+            }
+            btn.disabled = true;
+
+            try {
+                const result = await fetchGAS(actionName, args);
+                const byteCharacters = atob(result.base64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+                
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = result.filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+            } catch (err) {
+                alert("แจ้งเตือน: " + err.message);
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

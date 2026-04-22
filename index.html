@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+    <title>True Corporation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #f9fafb; -webkit-tap-highlight-color: transparent; }
+        .timer-urgent { animation: pulse 1s infinite; color: #ef4444; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .podium-enter { animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    </style>
+</head>
+<body class="h-[100dvh] flex flex-col overflow-hidden text-gray-800">
+
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-white/95 z-[60]">
+        <div class="flex flex-col items-center justify-center h-full w-full">
+            <div class="relative flex justify-center items-center mb-6">
+                <div class="absolute animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+                <img src="https://img2.pic.in.th/True--C.png" class="h-8 w-auto opacity-90">
+            </div>
+            <p id="loadingText" class="text-gray-600 font-bold animate-pulse tracking-wide">กำลังโหลด...</p>
+            <p id="errorText" class="text-red-500 text-sm mt-4 hidden">โหลดนานผิดปกติ? กรุณารีเฟรช หรือตรวจสอบสัญญาณเน็ต</p>
+        </div>
+    </div>
+
+    <div id="systemMessageScreen" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-100/50 backdrop-blur-sm overflow-hidden">
+        <div class="bg-white/90 backdrop-blur-xl rounded-[3rem] shadow-2xl max-w-sm w-full p-8 text-center border border-white relative overflow-hidden ring-1 ring-gray-100">
+            <div class="relative w-24 h-24 mx-auto mb-6 mt-4">
+                <div class="absolute inset-0 rounded-full border-[4px] border-transparent border-t-red-500 border-l-blue-500 animate-[spin_3s_linear_infinite]"></div>
+                <div class="absolute inset-2 bg-white rounded-full flex items-center justify-center border border-gray-100 shadow-inner">
+                    <div id="sysMsgIcon" class="text-5xl drop-shadow-md">⏳</div>
+                </div>
+            </div>
+            <h2 id="sysMsgTitle" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-blue-800 mb-2">ระบบยังไม่เปิด</h2>
+            <p id="sysMsgDetail" class="text-gray-500 mb-8 font-medium text-sm px-4">กรุณารอกำหนดการเปิดระบบ</p>
+            <div id="dateDisplayBox" class="bg-gradient-to-br from-gray-50 to-white rounded-[2rem] p-1 border border-gray-100 shadow-sm">
+                <div class="bg-white/60 rounded-[1.8rem] p-5 space-y-4 backdrop-blur-sm"> 
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-gray-500 uppercase">เริ่มสอบ</span>
+                        <span id="msgStart" class="text-sm font-bold text-white bg-green-500 px-4 py-1.5 rounded-2xl">-</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-gray-500 uppercase">หมดเวลา</span>
+                        <span id="msgEnd" class="text-sm font-bold text-white bg-red-600 px-4 py-1.5 rounded-2xl">-</span>
+                    </div>
+                </div>
+            </div>
+            <button id="btnBackToHome" onclick="location.reload()" class="hidden w-full bg-gray-600 text-white py-3.5 rounded-[1.5rem] font-bold shadow-lg mt-6">ปิด</button>
+        </div>
+    </div>
+
+    <div id="loginScreen" class="flex h-full flex-col items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-md w-full border border-gray-100 flex flex-col shrink-0 my-auto">
+            <div class="bg-gradient-to-r from-red-600 to-blue-500 p-8 text-white text-center shrink-0 rounded-t-[2.5rem]">
+                <h1 id="lblQuizName" class="text-2xl font-bold mb-1">...</h1>
+                <p class="text-blue-100 text-sm">ระบบยืนยันตัวตนอัตโนมัติ</p>
+            </div>
+            <div class="p-6 md:p-8 flex flex-col gap-5 shrink-0">
+                
+                <div id="authDynamicArea" class="w-full">
+                    <div id="autoVerifyContainer" class="flex flex-col items-center justify-center py-8 bg-blue-50 rounded-[1.5rem] border border-blue-100">
+                        <div class="relative flex items-center justify-center w-20 h-20 mb-4">
+                            <div class="absolute inset-0 rounded-full border-4 border-blue-200/50"></div>
+                            <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-red-500 border-r-red-500 animate-[spin_1s_linear_infinite]"></div>
+                            <img id="loadingProfilePic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-16 h-16 rounded-full object-cover z-10 bg-white shadow-sm">
+                        </div>
+                        <p class="text-[15px] font-bold text-blue-600 animate-pulse tracking-wide mt-1">กำลังยืนยันข้อมูล โปรดรอสักครู่...</p>
+                    </div>
+
+                    <div id="profileCard" class="hidden animate-fade-in-up bg-gradient-to-br from-gray-50 to-white p-5 rounded-[1.5rem] border border-gray-200 shadow-sm text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="relative mb-3">
+                                <img id="displayProfilePic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md">
+                                <div class="absolute bottom-0 right-0 bg-green-500 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center">
+                                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                            </div>
+                            <h3 id="displayFullName" class="text-lg font-bold text-gray-800 mb-1">...</h3>
+                            <div class="bg-blue-50 text-blue-700 px-4 py-1 rounded-full text-sm font-bold mb-2">
+                                รหัสพนักงาน: <span id="displayEmpId">...</span>
+                            </div>
+                            <p class="text-sm text-gray-600">ช่องทาง/ตำแหน่ง: <span id="displayDept" class="font-medium text-gray-800">...</span></p>
+                        </div>
+                    </div>
+
+                    <div id="manualIdContainer" class="hidden flex flex-col gap-2">
+                        <label class="text-sm font-bold text-gray-700 ml-1">รหัสพนักงาน (ไม่พบข้อมูลจาก LINE)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="inpEmpId" onfocus="setTimeout(() => this.scrollIntoView({behavior: 'smooth', block: 'center'}), 300)" class="flex-1 px-4 py-3 border rounded-2xl focus:ring-2 focus:ring-orange-400 outline-none transition text-sm bg-gray-50" placeholder="กรุณากรอกรหัสพนักงาน...">
+                            <button onclick="verifyManualId()" id="btnVerifyEmp" class="bg-gray-800 text-white px-4 py-2 rounded-2xl font-bold text-sm hover:bg-gray-900 transition whitespace-nowrap shadow-sm shrink-0">
+                                ตรวจสอบ
+                            </button>
+                        </div>
+                        <p id="manualVerifyMsg" class="text-xs min-h-[1.25rem] ml-1 mt-1 text-red-500"></p>
+                    </div>
+
+                    <div id="registerContainer" class="hidden flex flex-col gap-4 animate-fade-in-up">
+                        <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium flex items-center shadow-inner">
+                            <span class="mr-2 text-lg">⚠️</span> ไม่พบข้อมูลในระบบ กรุณาลงทะเบียน
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-gray-700 ml-1">รหัสพนักงาน</label>
+                            <input type="text" id="inpRegEmpId" class="w-full px-4 py-3 border border-gray-200 bg-gray-100 rounded-2xl outline-none text-sm text-gray-500" readonly>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-gray-700 ml-1">ชื่อ-นามสกุล (ภาษาไทย)</label>
+                            <input type="text" id="inpRegName" onfocus="setTimeout(() => this.scrollIntoView({behavior: 'smooth', block: 'center'}), 300)" class="w-full px-4 py-3 border border-blue-200 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none transition text-sm" placeholder="เช่น สมชาย ใจดี">
+                        </div>
+                        <button onclick="registerNewUser()" id="btnRegister" class="w-full bg-blue-600 text-white py-3.5 rounded-2xl font-bold shadow-md hover:bg-blue-700 transition transform active:scale-95">
+                            บันทึกข้อมูลและเข้าสอบ
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-5 rounded-[1.5rem] text-sm text-gray-600 grid grid-cols-3 gap-2 text-center border border-gray-100 mt-2">
+                    <div><span class="block text-xs text-gray-400">จำนวนข้อ</span><b id="lblTotalQ" class="text-gray-700 text-lg">-</b></div>
+                    <div><span class="block text-xs text-gray-400">เวลา (นาที)</span><b id="lblTime" class="text-gray-700 text-lg">-</b></div>
+                    <div><span class="block text-xs text-gray-400">เกณฑ์ผ่าน</span><b id="lblPassScore" class="text-gray-700 text-lg">-%</b></div>
+                </div>
+
+                <button id="btnStart" onclick="startQuizNow()" disabled class="w-full bg-gray-300 text-white py-4 rounded-[1.5rem] font-bold shadow transition cursor-not-allowed transform active:scale-95">
+                    รอการยืนยันตัวตน...
+                </button>
+
+                <div class="mt-2 pt-5 border-t border-gray-100 flex items-center justify-center gap-4">
+                    <img src="https://img2.pic.in.th/True--C.png" class="h-10 w-auto">
+                    <div class="text-left">
+                        <p class="text-xs text-gray-600 font-bold">พัฒนาระบบ Channel Communication</p>
+                        <p class="text-[10px] text-gray-400">แจ้งปัญหา K.ANON SRIWAJA Tel : 094-7359999</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="quizScreen" class="hidden flex-col h-full bg-gray-50 overflow-hidden">
+        <div class="bg-gradient-to-r from-red-600 to-blue-500 shadow-sm px-6 py-4 flex justify-between items-center z-10 shrink-0">
+            <div>
+                <h2 class="font-bold text-white truncate" id="quizHeaderName">Quiz</h2>
+                <p class="text-ms text-white opacity-90" id="quizTakerName">...</p>
+            </div>
+            <div class="text-right">
+                <div class="text-ms text-white opacity-80">เวลาที่เหลือ</div>
+                <div id="timerDisplay" class="text-xl font-mono text-white font-bold">00:00</div>
+            </div>
+        </div>
+        <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+            <div class="hidden md:block bg-gray-50 w-64 p-6 overflow-y-auto border-r border-gray-200 order-2 md:order-1">
+                <p class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider">ข้อสอบทั้งหมด</p>
+                <div id="questionMap" class="grid grid-cols-5 gap-2"></div>
+            </div>
+            <div class="flex-1 p-6 md:p-10 overflow-y-auto order-1 md:order-2 bg-white pb-24">
+                <div class="max-w-3xl mx-auto">
+                    <div class="w-full bg-gray-100 h-2 rounded-full mb-8 overflow-hidden">
+                        <div id="progressBar" class="bg-green-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div id="questionContainer" class="mb-8 animate-fade-in-up">
+                        <span class="inline-block px-4 py-1 bg-green-600 text-white text-sm font-bold rounded-2xl mb-4">ข้อที่ <span id="currQNum">1</span></span>
+                        <div id="qText" class="text-xl font-medium text-gray-800 mb-8 leading-relaxed"></div>
+                        <div id="choiceContainer" class="space-y-4"></div>
+                    </div>
+                    <div class="flex justify-between pt-8 border-t border-gray-100">
+                        <button type="button" onclick="nav(-1)" id="btnPrev" disabled class="px-8 py-3 rounded-2xl bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50 font-bold transition">ย้อนกลับ</button>
+                        <button type="button" onclick="nav(1)" id="btnNext" class="px-8 py-3 rounded-2xl bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-100 font-bold transition">ถัดไป</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 text-center shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="shrink-0 border-b border-gray-100 pb-4 mb-2">
+                <div id="resIcon" class="text-6xl mb-2 animate-bounce">🎉</div>
+                <h2 class="text-2xl font-bold text-gray-800">ผลการทดสอบ</h2>
+                <p id="resGrade" class="text-lg font-medium mb-4">...</p>
+                <div class="flex justify-center gap-4">
+                    <div class="bg-gray-50 rounded-xl p-3 w-32 border border-gray-200">
+                        <div class="text-3xl font-bold text-gray-800" id="resScore">0</div>
+                        <div class="text-gray-500 text-xs">คะแนนรวม</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-3 w-32 border border-gray-200">
+                        <div class="text-3xl font-bold text-gray-800" id="resPercent">0%</div>
+                        <div class="text-gray-500 text-xs">คิดเป็น</div>
+                    </div>
+                </div>
+            </div>
+            <div id="reviewSection" class="hidden flex-1 overflow-y-auto py-2 mb-4 text-left px-2 custom-scrollbar">
+                <h3 class="font-bold text-red-500 mb-3 flex items-center sticky top-0 bg-white py-2 border-b z-10"><span class="mr-2 text-xl">🅧</span> เฉลยข้อที่ตอบผิด</h3>
+                <div id="reviewContent" class="space-y-4"></div>
+            </div>
+            <div class="shrink-0 text-sm text-gray-500 flex justify-between bg-gray-50 p-3 rounded-lg mb-4">
+                <span>ผู้สอบ: <span id="resName" class="text-gray-800 font-medium"></span></span>
+                <span>เวลา: <span id="resTime" class="text-gray-800 font-medium"></span></span>
+            </div>
+            <button onclick="openLeaderboard()" class="w-full py-3 mb-3 bg-yellow-400 text-yellow-900 rounded-xl font-bold hover:bg-yellow-500 transition shadow-lg ring-2 ring-yellow-200 flex items-center justify-center gap-2">🏆 ดูอันดับคะแนนสูงสุด</button>
+            <button onclick="window.open('https://liff.line.me/2000733931-wPdEZX0R/channels/5000640583/crm/member/dashboard', '_blank')" class="shrink-0 w-full py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-bold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg active:scale-95">ดูคะแนนสะสมพอยต์</button>
+        </div>
+    </div>
+
+    <div id="leaderboardModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4 backdrop-blur-md transition-opacity duration-300">
+        <div class="bg-gray-50 rounded-3xl max-w-lg w-full shadow-2xl flex flex-col max-h-[90vh] overflow-hidden transform transition-all scale-100">
+            <div class="bg-white p-5 border-b border-gray-100 flex justify-between items-center z-10 shadow-sm relative">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2"><span class="text-2xl">🏆</span> Top Leaderboard</h2>
+                    <p class="text-xs text-gray-400 mt-0.5 font-medium">รายชื่อคะแนนสูงสุด</p>
+                </div>
+                <button onclick="closeLeaderboard()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600 flex items-center justify-center transition">✕</button>
+            </div>
+            <div class="overflow-y-auto flex-grow p-6 custom-scrollbar bg-gradient-to-b from-gray-50 to-white">
+                <div id="lbLoading" class="text-center py-10 text-gray-400 animate-pulse flex flex-col items-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-300 mb-2"></div> กำลังโหลดข้อมูล...
+                </div>
+                <div id="top3Container" class="grid grid-cols-3 gap-2 mb-8 items-end hidden px-2 pt-4"></div>
+                <div id="listContainer" class="space-y-2 hidden"></div>
+            </div>
+            <div class="p-4 bg-white border-t border-gray-100 text-center">
+                <button onclick="closeLeaderboard()" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold hover:bg-black transition shadow-lg">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="limitModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-[70] backdrop-blur-sm p-4 transition-opacity">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm p-8 text-center transform transition-all animate-fade-in-up border border-slate-100">
+            <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
+                <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-800 mb-2">สิทธิ์การสอบเต็มแล้ว</h3>
+            <p class="text-slate-500 text-sm mb-6 leading-relaxed">คุณได้ทำแบบทดสอบครบตามโควต้า <span id="limitCountText" class="font-bold text-red-600 text-base"></span> ครั้งที่ระบบกำหนดไว้แล้วครับ</p>
+            <button onclick="closeLimitModal()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95">รับทราบ</button>
+        </div>
+    </div>
+
+    <script>
+        const LIFF_ID = "1656846002-0dy88v15"; 
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx6Qq3EJQ41GWV5wzK3_h8rSjpZkvUVl7GHXIEJ2zdl-Iu5GyUBMOJDJud5ywMe1z5lZQ/exec"; 
+
+        async function fetchGAS(action, args = []) {
+            try {
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST', body: JSON.stringify({ action: action, args: args })
+                });
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+                return data.result;
+            } catch (err) {
+                console.error("GAS Error:", err); throw err;
+            }
+        }
+
+        let state = { settings: null, questions: [], answers: [], currIdx: 0, timer: null, timeLeft: 0, user: {} };
+        let startTime, endTime;
+        let userLinePic = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; 
+        let currentLineUid = ""; 
+
+        window.onload = async () => { 
+            try {
+                const settings = await fetchGAS('getQuizSettings');
+                initData(settings);
+
+                if (!document.getElementById('loginScreen').classList.contains('hidden')) {
+                    await liff.init({ liffId: LIFF_ID }); 
+                    if (liff.isLoggedIn()) {
+                        const profile = await liff.getProfile();
+                        userLinePic = profile.pictureUrl || userLinePic;
+                        currentLineUid = profile.userId;
+                        
+                        const loadingPic = document.getElementById('loadingProfilePic');
+                        if (loadingPic) loadingPic.src = userLinePic;
+
+                        executeAutoVerify(currentLineUid);
+                    } else {
+                        liff.login();
+                    }
+                }
+            } catch (err) {
+                console.error("Init Error: ", err);
+                alertErr(err);
+            }
+        };
+
+        function initData(settings) {
+            state.settings = settings;
+            document.getElementById('lblQuizName').innerText = settings.quizName;
+            document.getElementById('lblTotalQ').innerText = settings.numberOfQuestions;
+            document.getElementById('lblTime').innerText = settings.timeLimitMinutes;
+            document.getElementById('lblPassScore').innerText = settings.passingPercentage + "%";
+            document.getElementById('quizHeaderName').innerText = settings.quizName;
+            
+            const now = new Date();
+            let isAccessAllowed = true;
+            let startDate = settings.startDate ? new Date(settings.startDate) : null;
+            let endDate = settings.endDate ? new Date(settings.endDate) : null;
+
+            if (startDate && !isNaN(startDate) && now < startDate) {
+                isAccessAllowed = false; document.getElementById('sysMsgIcon').innerText = "⏳";
+                document.getElementById('sysMsgTitle').innerText = "ระบบยังไม่เปิด"; document.getElementById('sysMsgDetail').innerText = "ยังไม่ถึงเวลาเริ่มทำแบบทดสอบ";
+            } else if (endDate && !isNaN(endDate) && now > endDate) {
+                isAccessAllowed = false; document.getElementById('sysMsgIcon').innerText = "🔒";
+                document.getElementById('sysMsgTitle').innerText = "หมดเวลาสอบ"; document.getElementById('sysMsgDetail').innerText = "ระบบปิดรับคำตอบแล้ว";
+            }
+
+            if (!isAccessAllowed) {
+                document.getElementById('systemMessageScreen').classList.remove('hidden');
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('loginScreen').classList.remove('flex');
+                document.getElementById('msgStart').innerText = startDate ? startDate.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '-';
+                document.getElementById('msgEnd').innerText = endDate ? endDate.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '-';
+            }
+        }
+
+        function alertErr(e) { 
+            const loadingCont = document.getElementById('autoVerifyContainer');
+            if(loadingCont) loadingCont.innerHTML = `<p class="text-sm font-bold text-red-500">เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณารีเฟรช</p>`;
+        }
+
+        function executeAutoVerify(lineUid) {
+            fetchGAS('getEmployeeByLineId', [lineUid]).then(res => {
+                const autoCont = document.getElementById('autoVerifyContainer');
+                const profCard = document.getElementById('profileCard');
+                const manCont = document.getElementById('manualIdContainer');
+                const startBtn = document.getElementById('btnStart');
+
+                if (res.found) {
+                    state.user = { id: res.id, name: res.name, dept: res.department };
+                    document.getElementById('displayProfilePic').src = userLinePic;
+                    document.getElementById('displayFullName').innerText = res.name;
+                    document.getElementById('displayEmpId').innerText = res.id;
+                    document.getElementById('displayDept').innerText = res.department;
+                    
+                    autoCont.classList.add('hidden');
+                    profCard.classList.remove('hidden');
+                    
+                    startBtn.disabled = false; startBtn.innerText = "เริ่มทำแบบทดสอบ";
+                    startBtn.className = "w-full bg-green-500 text-white py-4 rounded-[1.5rem] font-bold shadow hover:bg-green-600 hover:-translate-y-1 transition transform cursor-pointer mt-4";
+                } else {
+                    autoCont.classList.add('hidden');
+                    manCont.classList.remove('hidden');
+                }
+            }).catch(alertErr);
+        }
+
+        function verifyManualId() {
+            if (document.activeElement) document.activeElement.blur();
+            const empIdInput = document.getElementById('inpEmpId').value.trim();
+            if(!empIdInput) { alert("กรุณากรอกรหัสพนักงาน"); return; }
+            
+            const btn = document.getElementById('btnVerifyEmp');
+            btn.innerText = "..."; btn.disabled = true;
+
+            const msgEl = document.getElementById('manualVerifyMsg');
+            msgEl.className = "text-xs min-h-[1.25rem] ml-1 mt-1 text-blue-500 flex items-center gap-1.5 animate-pulse font-medium";
+            msgEl.innerHTML = `<svg class="animate-spin h-3.5 w-3.5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>กำลังตรวจสอบ...`;
+
+            fetchGAS('getEmployeeByEmpId', [empIdInput, currentLineUid]).then(res => {
+                btn.innerText = "ตรวจสอบ"; btn.disabled = false;
+                msgEl.innerHTML = ""; 
+                
+                if (res.found) {
+                    state.user = { id: res.id, name: res.name, dept: res.department };
+                    document.getElementById('displayProfilePic').src = userLinePic; 
+                    document.getElementById('displayFullName').innerText = res.name;
+                    document.getElementById('displayEmpId').innerText = res.id;
+                    document.getElementById('displayDept').innerText = res.department;
+                    
+                    document.getElementById('manualIdContainer').classList.add('hidden');
+                    document.getElementById('profileCard').classList.remove('hidden');
+                    
+                    const startBtn = document.getElementById('btnStart');
+                    startBtn.disabled = false; startBtn.innerText = "เริ่มทำแบบทดสอบ";
+                    startBtn.className = "w-full bg-green-500 text-white py-4 rounded-[1.5rem] font-bold shadow hover:bg-green-600 hover:-translate-y-1 transition transform cursor-pointer mt-4";
+                } else {
+                    document.getElementById('manualIdContainer').classList.add('hidden');
+                    document.getElementById('registerContainer').classList.remove('hidden');
+                    document.getElementById('inpRegEmpId').value = empIdInput; 
+                }
+            }).catch(() => { 
+                btn.innerText = "ตรวจสอบ"; btn.disabled = false; 
+                msgEl.className = "text-xs min-h-[1.25rem] ml-1 mt-1 text-red-500";
+                msgEl.innerText = "🅧 เกิดข้อผิดพลาด กรุณาลองใหม่";
+            });
+        }
+
+        function registerNewUser() {
+            if (document.activeElement) document.activeElement.blur();
+            const regEmpId = document.getElementById('inpRegEmpId').value.trim();
+            const regName = document.getElementById('inpRegName').value.trim();
+            
+            if(!regEmpId || !regName) { alert('กรุณากรอกชื่อ-นามสกุลให้ครบถ้วน'); return; }
+            
+            const btn = document.getElementById('btnRegister');
+            btn.innerText = "กำลังบันทึกข้อมูล..."; btn.disabled = true;
+
+            fetchGAS('registerEmployee', [regEmpId, regName, currentLineUid]).then(res => {
+                btn.innerText = "บันทึกข้อมูลและเข้าสอบ"; btn.disabled = false;
+                
+                if(res.found) {
+                    state.user = { id: res.id, name: res.name, dept: res.department };
+                    document.getElementById('displayProfilePic').src = userLinePic; 
+                    document.getElementById('displayFullName').innerText = res.name;
+                    document.getElementById('displayEmpId').innerText = res.id;
+                    document.getElementById('displayDept').innerText = res.department;
+                    
+                    document.getElementById('registerContainer').classList.add('hidden');
+                    document.getElementById('profileCard').classList.remove('hidden');
+                    
+                    const startBtn = document.getElementById('btnStart');
+                    startBtn.disabled = false; startBtn.innerText = "เริ่มทำแบบทดสอบ";
+                    startBtn.className = "w-full bg-green-500 text-white py-4 rounded-[1.5rem] font-bold shadow hover:bg-green-600 hover:-translate-y-1 transition transform cursor-pointer mt-4";
+                } else {
+                    alert("เกิดข้อผิดพลาดในการลงทะเบียน: " + res.error);
+                }
+            }).catch(alertErr);
+        }
+
+        // 📌 ฟังก์ชันเริ่มทำแบบทดสอบ (เพิ่มระบบเช็คจำนวนครั้งโควต้า)
+        async function startQuizNow() {
+            if(!state.user.id) return;
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            
+            try {
+                // 1. ส่งไอดีพนักงานไปเช็คในระบบว่าสอบไปกี่ครั้งแล้ว
+                const res = await fetchGAS('checkUserAttempts', [state.user.id]);
+                const maxAttempts = parseInt(state.settings.maxAttempts) || 1; 
+                
+                // 2. ถ้าสอบเกินหรือเท่ากับโควต้า ให้บล็อกทันที
+                if (res.attempts >= maxAttempts) {
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    document.getElementById('limitCountText').innerText = maxAttempts;
+                    document.getElementById('limitModal').classList.remove('hidden');
+                    document.getElementById('limitModal').classList.add('flex');
+                    return;
+                }
+                
+                // 3. ถ้ายังไม่เกินโควต้า ให้เข้าสอบได้
+                loadQuestions();
+
+            } catch (err) {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                alert("เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์: " + err.message);
+            }
+        }
+
+        // ฟังก์ชันสำหรับปิด Popup แจ้งเตือนสิทธิ์เต็ม
+        function closeLimitModal() {
+            document.getElementById('limitModal').classList.add('hidden');
+            document.getElementById('limitModal').classList.remove('flex');
+        }
+
+        function loadQuestions() {
+            fetchGAS('getQuizQuestions').then(qs => {
+                state.questions = qs.slice(0, state.settings.numberOfQuestions);
+                state.answers = new Array(state.questions.length).fill(null);
+                if(state.questions.length === 0) { alert("ไม่พบข้อสอบ"); return; }
+                setupQuizUI();
+            }).catch(alertErr);
+        }
+
+        function setupQuizUI() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('flex');
+            
+            document.getElementById('quizScreen').classList.remove('hidden');
+            document.getElementById('quizScreen').classList.add('flex');
+            document.getElementById('quizTakerName').innerText = state.user.name;
+
+            state.timeLeft = state.settings.timeLimitMinutes * 60; startTime = new Date();
+            updateTimer();
+            state.timer = setInterval(() => { state.timeLeft--; updateTimer(); if(state.timeLeft <= 0) submitQuiz(true); }, 1000);
+
+            const map = document.getElementById('questionMap'); map.innerHTML = '';
+            state.questions.forEach((_, i) => { map.innerHTML += `<button id="map-${i}" onclick="jump(${i})" class="w-8 h-8 rounded bg-white border text-gray-500 text-sm hover:border-indigo-400 transition">${i+1}</button>`; });
+            renderQuestion();
+        }
+
+        function updateTimer() {
+            const m = Math.floor(state.timeLeft / 60).toString().padStart(2,'0');
+            const s = (state.timeLeft % 60).toString().padStart(2,'0');
+            const el = document.getElementById('timerDisplay');
+            if(el) { el.innerText = `${m}:${s}`; if(state.timeLeft < 60) el.classList.add('timer-urgent'); }
+        }
+
+        function renderQuestion() {
+            const q = state.questions[state.currIdx]; const container = document.getElementById('questionContainer');
+            container.classList.remove('animate-fade-in-up'); void container.offsetWidth; container.classList.add('animate-fade-in-up');
+            document.getElementById('currQNum').innerText = state.currIdx + 1;
+            document.getElementById('qText').innerHTML = q.question;
+            document.getElementById('progressBar').style.width = `${((state.currIdx + 1) / state.questions.length) * 100}%`;
+            const cCont = document.getElementById('choiceContainer'); cCont.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const isSel = state.answers[state.currIdx] === i;
+                cCont.innerHTML += `<div onclick="sel(${i})" class="p-4 border rounded-xl cursor-pointer flex items-center transition transform active:scale-[0.99] ${isSel ? 'border-white bg-green-600 shadow-sm' : 'border-white hover:bg-green-600 hover:border-gray-300 group'}">
+                        <div class="w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center transition ${isSel ? 'border-white bg-white' : 'border-gray-300 group-hover:border-white'}">${isSel ? '<div class="w-3 h-3 bg-green-600 rounded-full"></div>' : ''}</div>
+                        <span class="${isSel ? 'text-white font-medium' : 'text-gray-600 group-hover:text-white'} text-lg">${opt}</span></div>`;
+            });
+            document.getElementById('btnPrev').disabled = state.currIdx === 0;
+            document.getElementById('btnNext').innerText = state.currIdx === state.questions.length - 1 ? 'ส่งคำตอบ' : 'ถัดไป';
+            updateMap();
+        }
+
+        function sel(idx) { state.answers[state.currIdx] = idx; renderQuestion(); }
+        function jump(i) { state.currIdx = i; renderQuestion(); }
+        function nav(dir) {
+            if (dir === 1 && state.currIdx >= state.questions.length - 1) { if(confirm("ยืนยันการส่งคำตอบ?")) { submitQuiz(false); } return; } 
+            const newIdx = state.currIdx + dir; if(newIdx >= 0 && newIdx < state.questions.length) { state.currIdx = newIdx; renderQuestion(); }
+        }
+
+        function updateMap() {
+            state.answers.forEach((ans, i) => {
+                const el = document.getElementById(`map-${i}`);
+                if(ans !== null) el.className = "w-8 h-8 rounded bg-gray-700 text-white text-sm font-bold shadow-sm transition transform scale-105";
+                else el.className = "w-8 h-8 rounded bg-white border text-gray-500 text-sm hover:border-gray-400 transition";
+                if(i === state.currIdx) el.classList.add('ring-2', 'ring-gray-300', 'ring-offset-1'); else el.classList.remove('ring-2', 'ring-gray-300', 'ring-offset-1');
+            });
+        }
+
+        function submitQuiz(auto) {
+            clearInterval(state.timer); document.getElementById('loadingOverlay').classList.remove('hidden');
+            endTime = new Date(); let score = 0; let incorrectIndices = []; let detailedLog = [];
+            state.questions.forEach((q, i) => {
+                const isCorrect = state.answers[i] === q.correct; if(isCorrect) score++; else incorrectIndices.push(i);
+                const tempDiv = document.createElement("div"); tempDiv.innerHTML = q.question; const cleanQ = (tempDiv.textContent || "").substring(0, 40) + "...";
+                const uAns = state.answers[i] !== null ? q.options[state.answers[i]] : "ไม่ได้ตอบ"; const cAns = q.options[q.correct];
+                let logText = `${isCorrect ? "✅" : "🅧"} [ข้อ ${i+1}] ${cleanQ}\n   ตอบ: ${uAns}`;
+                if(!isCorrect) logText += `\n   (เฉลย: ${cAns})`; detailedLog.push(logText);
+            });
+            const pct = Math.round((score / state.questions.length) * 100); const passed = pct >= state.settings.passingPercentage;
+            const durationSec = Math.floor((endTime - startTime)/1000); const durationStr = `${Math.floor(durationSec/60)}:${(durationSec%60).toString().padStart(2,'0')}`;
+            
+            const result = {
+                studentId: state.user.id, fullName: state.user.name, score: score, totalQuestions: state.questions.length,
+                percentage: pct, grade: passed ? "ผ่าน" : "ไม่ผ่าน", duration: durationStr, answerLog: detailedLog.join('\n----------------\n'),
+                profilePic: userLinePic
+            };
+            fetchGAS('saveQuizResult', [result]).then(() => showResult(result, passed, incorrectIndices))
+                .catch((err) => { document.getElementById('loadingOverlay').classList.add('hidden'); alert("เกิดข้อผิดพลาดในการส่งคำตอบ: " + err.message + "\nกรุณาลองใหม่อีกครั้ง"); });
+        }
+
+        function showResult(res, passed, incorrectIndices) {
+            document.getElementById('loadingOverlay').classList.add('hidden'); const modal = document.getElementById('resultModal');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            document.getElementById('resIcon').innerText = passed ? "🏆" : "💪";
+            document.getElementById('resGrade').innerText = passed ? "ยินดีด้วย! คุณผ่านเกณฑ์" : "พยายามอีกนิด คุณยังไม่ผ่านเกณฑ์";
+            document.getElementById('resGrade').className = passed ? "text-lg font-bold mb-6 text-green-600" : "text-lg font-bold mb-6 text-red-500";
+            document.getElementById('resScore').innerText = `${res.score}/${res.totalQuestions}`; document.getElementById('resName').innerText = res.fullName;
+            document.getElementById('resTime').innerText = res.duration; document.getElementById('resPercent').innerText = res.percentage + "%";
+            const reviewSection = document.getElementById('reviewSection'); const reviewContent = document.getElementById('reviewContent');
+            if (incorrectIndices.length > 0) {
+                reviewSection.classList.remove('hidden'); reviewContent.innerHTML = ''; 
+                incorrectIndices.forEach(idx => {
+                    const q = state.questions[idx]; const userAnsIdx = state.answers[idx];
+                    const userAnsText = userAnsIdx !== null ? q.options[userAnsIdx] : "ไม่ได้ตอบ"; const correctAnsText = q.options[q.correct];
+                    const tempDiv = document.createElement("div"); tempDiv.innerHTML = q.question; const questionText = tempDiv.textContent || tempDiv.innerText || "";
+                    const item = document.createElement('div'); item.className = "bg-gray-50 rounded-xl p-4 border border-gray-200 text-sm hover:shadow-sm transition";
+                    item.innerHTML = `<div class="font-bold text-gray-700 mb-2 border-b pb-2 border-gray-200"><span class="text-red-500 mr-1">ข้อที่ ${idx + 1}:</span> ${questionText}</div>
+                        <div class="space-y-1"><div class="text-red-600 flex items-start bg-red-50 p-1 rounded"><span class="mr-2 min-w-[60px] font-bold">🅧 ตอบ:</span> <span>${userAnsText}</span></div>
+                        <div class="text-green-600 flex items-start bg-green-50 p-1 rounded"><span class="mr-2 min-w-[60px] font-bold">✅ ถูก:</span> <span>${correctAnsText}</span></div></div>`;
+                    reviewContent.appendChild(item);
+                });
+            } else { reviewSection.classList.add('hidden'); }
+        }
+
+        function openLeaderboard() {
+            const modal = document.getElementById('leaderboardModal'); const top3Cont = document.getElementById('top3Container'); const listCont = document.getElementById('listContainer'); const loading = document.getElementById('lbLoading');
+            modal.classList.remove('hidden'); modal.classList.add('flex'); top3Cont.innerHTML = ''; listCont.innerHTML = ''; top3Cont.classList.add('hidden'); listCont.classList.add('hidden'); loading.classList.remove('hidden');
+            fetchGAS('getTopTenScores').then(data => {
+                loading.classList.add('hidden');
+                if (data.length === 0) { listCont.innerHTML = '<div class="text-center text-gray-400 py-10">ยังไม่มีผู้กล้าในทำเนียบ</div>'; listCont.classList.remove('hidden'); return; }
+                const top3 = data.slice(0, 3); let podiumOrder = [];
+                if (top3[1]) podiumOrder.push({ ...top3[1], rank: 2 }); if (top3[0]) podiumOrder.push({ ...top3[0], rank: 1 }); if (top3[2]) podiumOrder.push({ ...top3[2], rank: 3 });
+                if (podiumOrder.length > 0) {
+                    let top3Html = `<div class="absolute top-20 left-1/2 -translate-x-1/2 w-full h-64 bg-gradient-to-t from-blue-50/50 to-transparent pointer-events-none -z-10 rounded-full blur-3xl"></div>`;
+                    podiumOrder.forEach(p => {
+                        let cf = {}; 
+                        if (p.rank === 1) { cf = { margin: 'mt-0 z-30', cardHeight: 'min-h-[220px]', borderTop: 'border-t-[6px] border-yellow-400', medal: '🥇', medalSize: 'text-5xl md:text-6xl', nameSize: 'text-base md:text-lg', scoreColor: 'text-yellow-600', scoreSize: 'text-4xl md:text-5xl', shadow: 'shadow-xl shadow-yellow-100', avatarRing: 'ring-4 ring-yellow-100' }; } 
+                        else { const colorTheme = p.rank === 2 ? 'slate' : 'orange'; const icon = p.rank === 2 ? '🥈' : '🥉'; cf = { margin: 'mt-8 md:mt-12 z-20', cardHeight: 'min-h-[190px]', borderTop: `border-t-[6px] border-${colorTheme}-300`, medal: icon, medalSize: 'text-4xl md:text-5xl', nameSize: 'text-sm md:text-base', scoreColor: `text-${colorTheme}-600`, scoreSize: 'text-2xl md:text-3xl', shadow: 'shadow-lg', avatarRing: `ring-4 ring-${colorTheme}-100` }; }
+                        top3Html += `<div class="flex flex-col items-center relative transition-transform hover:-translate-y-1 duration-300 podium-enter ${cf.margin}">
+                            <div class="${cf.medalSize} drop-shadow-md mb-[-1.5rem] z-40 relative">${cf.medal}</div>
+                            <div class="bg-white w-full ${cf.cardHeight} rounded-2xl ${cf.borderTop} ${cf.shadow} flex flex-col items-center pt-8 pb-4 px-2 relative overflow-hidden">
+                                <img src="${p.profilePic}" class="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover mb-3 ${cf.avatarRing} shadow-inner bg-white">
+                                <div class="w-full px-1 flex items-center justify-center min-h-[3rem] mb-1"><div class="${cf.nameSize} font-bold text-gray-800 leading-tight text-center break-words w-full">${p.name}</div></div>
+                                <div class="font-black ${cf.scoreSize} ${cf.scoreColor} tracking-tight leading-none">${p.score}</div>
+                                <div class="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-2">Score</div>
+                                <div class="bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded-md font-medium flex items-center gap-1"><span>⏱️</span> ${p.durationStr}</div>
+                            </div></div>`;
+                    });
+                    top3Cont.className = "grid grid-cols-3 gap-3 md:gap-6 mb-6 items-start px-2 pt-8 relative z-10"; top3Cont.innerHTML = top3Html; top3Cont.classList.remove('hidden');
+                }
+                const rest = data.slice(3);
+                if (rest.length > 0) {
+                    let listHtml = '';
+                    rest.forEach((row, idx) => {
+                        listHtml += `<div class="flex items-center p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:border-indigo-200 transition group podium-enter" style="animation-delay: ${0.3 + (idx * 0.05)}s">
+                            <div class="w-8 text-center font-bold text-gray-400 text-sm">#${idx + 4}</div>
+                            <img src="${row.profilePic}" class="mx-3 w-8 h-8 rounded-full object-cover shrink-0 border border-gray-200 bg-white">
+                            <div class="flex-grow min-w-0"><div class="font-bold text-gray-700 truncate text-sm">${row.name}</div><div class="text-[10px] text-gray-400 flex items-center gap-1"><span>⏱️</span> ${row.durationStr}</div></div>
+                            <div class="text-right"><div class="font-bold text-indigo-600 text-lg">${row.score}</div></div></div>`;
+                    });
+                    listCont.innerHTML = listHtml; listCont.classList.remove('hidden');
+                }
+            }).catch(alertErr);
+        }
+        function closeLeaderboard() { document.getElementById('leaderboardModal').classList.add('hidden'); document.getElementById('leaderboardModal').classList.remove('flex'); }
+    </script>
+</body>
+</html>
