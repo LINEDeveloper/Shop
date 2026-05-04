@@ -113,7 +113,7 @@
                     <div class="lg:col-span-2 bg-white rounded-2xl p-6 md:p-8 premium-card">
                         <div class="mb-6 pb-4 border-b border-slate-100 flex items-center justify-between">
                             <div>
-                                <h2 class="text-lg font-bold text-slate-800">ความคืบหน้าแยกตามช่องทาง</h2>
+                                <h2 class="text-lg font-bold text-slate-800">% การสอบแต่ละช่องทางแบบเรียวไทม์</h2>
                                 <p class="text-xs text-slate-500 mt-1">Completion Progress by Channel</p>
                             </div>
                         </div>
@@ -253,12 +253,12 @@
                 chArray.sort((a, b) => b.percent - a.percent);
 
                 chArray.forEach(ch => {
-                    // จุดที่ 2: สร้างกราฟวงกลม (Donut Chart) ด้วย CSS conic-gradient พร้อมข้อมูลสวยงามด้านข้าง
+                    // จุดแก้ไข: ปรับขนาดจาก w-12 h-12 เป็น w-14 h-14 และปรับขอบขาวด้านในให้สมส่วน
                     channelContainer.innerHTML += `
                         <div class="flex items-center gap-3 bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm hover:border-red-200 hover:shadow-md transition-all group">
-                            <div class="relative w-12 h-12 rounded-full flex items-center justify-center shrink-0" style="background: conic-gradient(#dc2626 ${ch.percent}%, #f1f5f9 0);">
-                                <div class="absolute inset-[3.5px] bg-white rounded-full flex items-center justify-center shadow-sm">
-                                    <span class="text-[10px] font-bold text-slate-700 group-hover:text-red-600 transition-colors">${ch.percent}%</span>
+                            <div class="relative w-14 h-14 rounded-full flex items-center justify-center shrink-0" style="background: conic-gradient(#dc2626 ${ch.percent}%, #f1f5f9 0);">
+                                <div class="absolute inset-[4px] bg-white rounded-full flex items-center justify-center shadow-sm">
+                                    <span class="text-xs font-bold text-slate-700 group-hover:text-red-600 transition-colors">${ch.percent}%</span>
                                 </div>
                             </div>
                             <div class="flex-1 min-w-0">
