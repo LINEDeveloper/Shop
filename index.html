@@ -19,7 +19,114 @@
         @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
         .podium-enter { animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* ==========================================
+           แอนิเมชันการ์ดประเมินความพึงพอใจ (Facial Rigging)
+           ========================================== */
+        .rate-card {
+            position: relative;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .rate-card:hover { border-color: #cbd5e1; transform: translateY(-2px); }
+        .rate-card:active { transform: scale(0.94); }
+        .rate-card.active {
+            border-color: #dc2626 !important;
+            background: linear-gradient(180deg, #fff5f5 0%, #ffffff 100%) !important;
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 24px -6px rgba(220, 38, 38, 0.22), 0 0 0 3px rgba(254, 202, 202, 0.6);
+            z-index: 10;
+        }
+        .rate-card.dimmed {
+            opacity: 0.3;
+            filter: grayscale(60%);
+            transform: scale(0.94);
+            pointer-events: none;
+        }
+        @keyframes ring-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+        .rate-card.active::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 1rem;
+            animation: ring-pulse 0.8s ease-out;
+            pointer-events: none;
+        }
+        .face-svg { transition: transform 0.3s ease; }
+        .eye, .mouth, .brow, .cheek, .sparkle { transform-box: fill-box; transform-origin: center; }
+
+        @keyframes head-shake {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            20%, 60% { transform: translateX(-2.5px) rotate(-4deg); }
+            40%, 80% { transform: translateX(2.5px) rotate(4deg); }
+        }
+        @keyframes brow-angry {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(2px) scale(1.08); }
+        }
+        .rate-card.active[data-rate="1"] .face-svg { animation: head-shake 0.55s ease-in-out; }
+        .rate-card.active[data-rate="1"] .brow { animation: brow-angry 0.55s ease-in-out; }
+
+        @keyframes sigh-motion {
+            0%, 100% { transform: translateY(0) scale(1); }
+            45% { transform: translateY(2.5px) scale(0.96); }
+        }
+        @keyframes eye-blink {
+            0%, 100% { transform: scaleY(1); }
+            25%, 75% { transform: scaleY(0.1); }
+            50% { transform: scaleY(1); }
+        }
+        .rate-card.active[data-rate="2"] .face-svg { animation: sigh-motion 0.7s ease-in-out; }
+        .rate-card.active[data-rate="2"] .eye { animation: eye-blink 0.7s ease-in-out; }
+        .rate-card.active[data-rate="3"] .eye { animation: eye-blink 0.65s ease-in-out; }
+
+        @keyframes happy-nod {
+            0%, 100% { transform: translateY(0) scale(1); }
+            40% { transform: translateY(-3px) scale(1.06); }
+            70% { transform: translateY(1px) scale(1.02); }
+        }
+        @keyframes smile-grow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scaleX(1.2) scaleY(1.15) translateY(-1px); }
+        }
+        @keyframes cheek-glow {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.45); opacity: 1; }
+        }
+        .rate-card.active[data-rate="4"] .face-svg { animation: happy-nod 0.65s ease-out; }
+        .rate-card.active[data-rate="4"] .mouth { animation: smile-grow 0.65s ease-out; }
+        .rate-card.active[data-rate="4"] .cheek { animation: cheek-glow 0.65s ease-out; }
+
+        @keyframes joyful-bounce {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            30% { transform: scale(1.12) rotate(-4deg) translateY(-3px); }
+            60% { transform: scale(1.1) rotate(4deg) translateY(-2px); }
+        }
+        @keyframes laugh-mouth {
+            0%, 100% { transform: scale(1); }
+            30% { transform: scaleY(1.3) scaleX(1.1); }
+            60% { transform: scaleY(0.9) scaleX(1.05); }
+            80% { transform: scaleY(1.2) scaleX(1.08); }
+        }
+        @keyframes star-twinkle {
+            0% { opacity: 0; transform: scale(0) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.25) rotate(90deg); }
+            100% { opacity: 0; transform: scale(0.5) rotate(180deg); }
+        }
+        .rate-card.active[data-rate="5"] .face-svg { animation: joyful-bounce 0.75s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .rate-card.active[data-rate="5"] .mouth { animation: laugh-mouth 0.75s ease-in-out; }
+        .rate-card.active[data-rate="5"] .cheek { animation: cheek-glow 0.75s ease-in-out; }
+        .rate-card.active[data-rate="5"] .sparkle { animation: star-twinkle 0.8s ease-out forwards; }
+
+        @keyframes slide-up-fade {
+            0% { opacity: 0; transform: translateY(8px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .thank-you-banner { animation: slide-up-fade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden text-gray-800">
@@ -180,33 +287,148 @@
         </div>
     </div>
 
+    <!-- 📌 หน้าสรุปผลการทดสอบ + ระบบประเมินความพึงพอใจเมื่อได้คะแนนเต็ม -->
     <div id="resultModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 text-center shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="shrink-0 border-b border-gray-100 pb-4 mb-2">
-                <div id="resIcon" class="text-6xl mb-2 animate-bounce">🎉</div>
-                <h2 class="text-2xl font-bold text-gray-800">ผลการทดสอบ</h2>
-                <p id="resGrade" class="text-lg font-medium mb-4">...</p>
-                <div class="flex justify-center gap-4">
-                    <div class="bg-gray-50 rounded-xl p-3 w-32 border border-gray-200">
-                        <div class="text-3xl font-bold text-gray-800" id="resScore">0</div>
-                        <div class="text-gray-500 text-xs">คะแนนรวม</div>
+        <div id="resultModalCard" class="bg-white rounded-3xl max-w-md w-full p-5 text-center shadow-2xl flex flex-col max-h-[94vh] overflow-y-auto custom-scrollbar">
+            
+            <!-- 1. ส่วนหัว: รูปโปรไฟล์ LINE + ข้อมูลส่วนตัว ด้านซ้ายบน และเวลาที่ใช้ด้านขวาบน -->
+            <div class="shrink-0 bg-slate-50 border border-slate-100 rounded-2xl p-3.5 mb-4 flex items-center justify-between text-left shadow-sm">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="relative shrink-0">
+                        <img id="resProfilePic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm bg-white">
+                        <div class="absolute bottom-0 right-0 bg-green-500 w-3.5 h-3.5 rounded-full border-2 border-white"></div>
                     </div>
-                    <div class="bg-gray-50 rounded-xl p-3 w-32 border border-gray-200">
-                        <div class="text-3xl font-bold text-gray-800" id="resPercent">0%</div>
-                        <div class="text-gray-500 text-xs">คิดเป็น</div>
+                    <div class="min-w-0">
+                        <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none mb-1">ข้อมูลส่วนตัว</span>
+                        <h3 id="resName" class="text-base font-extrabold text-slate-800 truncate leading-tight">...</h3>
+                    </div>
+                </div>
+                <div class="text-right shrink-0 pl-3 border-l border-slate-200/80">
+                    <span class="block text-[10px] font-semibold text-slate-400">เวลาที่ใช้</span>
+                    <span id="resTime" class="text-xs font-bold text-slate-700">-</span>
+                </div>
+            </div>
+
+            <!-- 2. ส่วนแสดงคะแนนรวม -->
+            <div class="shrink-0 border-b border-gray-100 pb-4 mb-2">
+                <div id="quotaNoticeBadge" class="hidden inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-bold px-3 py-1 rounded-full mb-2">
+                    <span>📌</span> คุณใช้สิทธิ์การสอบครบตามโควต้าแล้ว (แสดงผลคะแนนล่าสุด)
+                </div>
+
+                <h2 class="text-xl font-extrabold text-gray-800">ผลการทดสอบ</h2>
+                <p id="resGrade" class="text-sm font-bold mt-0.5 mb-3.5">...</p>
+                
+                <div class="flex justify-center gap-3">
+                    <div class="bg-gray-50 rounded-2xl py-2.5 px-4 w-32 border border-gray-200/80">
+                        <div class="text-2xl font-extrabold text-gray-800" id="resScore">0</div>
+                        <div class="text-gray-500 text-[11px] font-medium">คะแนนรวม</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-2xl py-2.5 px-4 w-32 border border-gray-200/80">
+                        <div class="text-2xl font-extrabold text-gray-800" id="resPercent">0%</div>
+                        <div class="text-gray-500 text-[11px] font-medium">คิดเป็น</div>
                     </div>
                 </div>
             </div>
-            <div id="reviewSection" class="hidden flex-1 overflow-y-auto py-2 mb-4 text-left px-2 custom-scrollbar">
-                <h3 class="font-bold text-red-500 mb-3 flex items-center sticky top-0 bg-white py-2 border-b z-10"><span class="mr-2 text-xl">🅧</span> เฉลยข้อที่ตอบผิด</h3>
-                <div id="reviewContent" class="space-y-4"></div>
+
+            <!-- 3. ส่วนแสดงเฉลยข้อที่ตอบผิด (แสดงเฉพาะกรณีมีข้อผิด) -->
+            <div id="reviewSection" class="hidden flex-col flex-1 overflow-hidden mb-4 text-left min-h-[140px]">
+                <h3 class="font-bold text-red-500 text-sm py-2 px-1 flex items-center shrink-0 border-b border-gray-100 bg-white">
+                    <span class="mr-1.5 text-base">🅧</span> เฉลยข้อที่ตอบผิด
+                </h3>
+                <div id="reviewContent" class="space-y-3 overflow-y-auto pt-3 pr-1 custom-scrollbar flex-1"></div>
             </div>
-            <div class="shrink-0 text-sm text-gray-500 flex justify-between bg-gray-50 p-3 rounded-lg mb-4">
-                <span>ผู้สอบ: <span id="resName" class="text-gray-800 font-medium"></span></span>
-                <span>เวลา: <span id="resTime" class="text-gray-800 font-medium"></span></span>
+
+            <!-- 4. ปุ่มดำเนินการต่อด้านล่าง -->
+            <div class="shrink-0 space-y-2.5 mt-2">
+                <button onclick="openLeaderboard()" class="w-full py-3 bg-yellow-400 text-yellow-900 rounded-xl font-bold text-sm hover:bg-yellow-500 transition shadow-md ring-2 ring-yellow-200 flex items-center justify-center gap-2">🏆 ดูอันดับคะแนนสูงสุด</button>
+                <button onclick="window.open('https://liff.line.me/2000733931-wPdEZX0R/channels/5000640583/crm/member/dashboard', '_blank')" class="w-full py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-bold text-sm hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md active:scale-95">ดูคะแนนสะสมพอยต์</button>
             </div>
-            <button onclick="openLeaderboard()" class="w-full py-3 mb-3 bg-yellow-400 text-yellow-900 rounded-xl font-bold hover:bg-yellow-500 transition shadow-lg ring-2 ring-yellow-200 flex items-center justify-center gap-2">🏆 ดูอันดับคะแนนสูงสุด</button>
-            <button onclick="window.open('https://liff.line.me/2000733931-wPdEZX0R/channels/5000640583/crm/member/dashboard', '_blank')" class="shrink-0 w-full py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-bold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg active:scale-95">ดูคะแนนสะสมพอยต์</button>
+
+            <!-- 5. ส่วนประเมินความพึงพอใจ (แสดงเฉพาะเมื่อสอบได้คะแนนเต็ม 100% เท่านั้น) -->
+            <div id="feedbackSection" class="hidden shrink-0 mt-4 pt-4 border-t border-dashed border-slate-200">
+                <div id="fbFormArea">
+                    <div class="inline-flex items-center gap-1 bg-amber-50 border border-amber-200/80 text-amber-700 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full mb-1 tracking-wide">
+                        <span>✨</span> USER FEEDBACK
+                    </div>
+                    <h4 class="text-sm font-extrabold text-slate-800">ประเมินความพึงพอใจการใช้งานเว็บ</h4>
+                    <p class="text-[11px] text-slate-400 mb-3">แตะเลือกไอคอนเพื่อให้คะแนน (บันทึกอัตโนมัติ)</p>
+
+                    <div class="grid grid-cols-5 gap-1.5 px-0.5">
+                        <!-- ระดับ 1: ควรปรับปรุง -->
+                        <button type="button" onclick="selectAndSaveFeedback(1, 'ควรปรับปรุง')" data-rate="1" class="rate-card flex flex-col items-center py-2.5 px-1 rounded-2xl border border-slate-200 bg-white cursor-pointer">
+                            <svg class="face-svg w-9 h-9 mb-1.5" viewBox="0 0 48 48" fill="none">
+                                <circle cx="24" cy="24" r="20" fill="#FEE2E2" stroke="#EF4444" stroke-width="2.5"/>
+                                <path class="brow" d="M15 18L20 21M33 18L28 21" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round"/>
+                                <circle class="eye" cx="18" cy="23" r="2" fill="#EF4444"/>
+                                <circle class="eye" cx="30" cy="23" r="2" fill="#EF4444"/>
+                                <path class="mouth" d="M17 33C19 29.5 29 29.5 31 33" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round"/>
+                            </svg>
+                            <span class="text-xs font-extrabold text-slate-800 leading-none">1</span>
+                            <span class="text-[9px] text-slate-500 mt-0.5 whitespace-nowrap">ควรปรับปรุง</span>
+                        </button>
+
+                        <!-- ระดับ 2: พอใช้ -->
+                        <button type="button" onclick="selectAndSaveFeedback(2, 'พอใช้')" data-rate="2" class="rate-card flex flex-col items-center py-2.5 px-1 rounded-2xl border border-slate-200 bg-white cursor-pointer">
+                            <svg class="face-svg w-9 h-9 mb-1.5" viewBox="0 0 48 48" fill="none">
+                                <circle cx="24" cy="24" r="20" fill="#FFEDD5" stroke="#F97316" stroke-width="2.5"/>
+                                <circle class="eye" cx="18" cy="21" r="2" fill="#EA580C"/>
+                                <circle class="eye" cx="30" cy="21" r="2" fill="#EA580C"/>
+                                <path class="mouth" d="M18 32C20 29.5 28 29.5 30 32" stroke="#EA580C" stroke-width="2.5" stroke-linecap="round"/>
+                            </svg>
+                            <span class="text-xs font-extrabold text-slate-800 leading-none">2</span>
+                            <span class="text-[9px] text-slate-500 mt-0.5">พอใช้</span>
+                        </button>
+
+                        <!-- ระดับ 3: ปานกลาง -->
+                        <button type="button" onclick="selectAndSaveFeedback(3, 'ปานกลาง')" data-rate="3" class="rate-card flex flex-col items-center py-2.5 px-1 rounded-2xl border border-slate-200 bg-white cursor-pointer">
+                            <svg class="face-svg w-9 h-9 mb-1.5" viewBox="0 0 48 48" fill="none">
+                                <circle cx="24" cy="24" r="20" fill="#FEF9C3" stroke="#EAB308" stroke-width="2.5"/>
+                                <circle class="cheek" cx="14" cy="26" r="2.5" fill="#FDE047"/>
+                                <circle class="cheek" cx="34" cy="26" r="2.5" fill="#FDE047"/>
+                                <circle class="eye" cx="18" cy="21" r="2" fill="#CA8A04"/>
+                                <circle class="eye" cx="30" cy="21" r="2" fill="#CA8A04"/>
+                                <line class="mouth" x1="18" y1="30" x2="30" y2="30" stroke="#CA8A04" stroke-width="2.5" stroke-linecap="round"/>
+                            </svg>
+                            <span class="text-xs font-extrabold text-slate-800 leading-none">3</span>
+                            <span class="text-[9px] text-slate-500 mt-0.5">ปานกลาง</span>
+                        </button>
+
+                        <!-- ระดับ 4: ดีมาก -->
+                        <button type="button" onclick="selectAndSaveFeedback(4, 'ดีมาก')" data-rate="4" class="rate-card flex flex-col items-center py-2.5 px-1 rounded-2xl border border-slate-200 bg-white cursor-pointer">
+                            <svg class="face-svg w-9 h-9 mb-1.5" viewBox="0 0 48 48" fill="none">
+                                <circle cx="24" cy="24" r="20" fill="#DCFCE7" stroke="#22C55E" stroke-width="2.5"/>
+                                <circle class="cheek" cx="14" cy="26" r="2.5" fill="#F9A8D4" opacity="0.7"/>
+                                <circle class="cheek" cx="34" cy="26" r="2.5" fill="#F9A8D4" opacity="0.7"/>
+                                <path class="eye" d="M15 21C16 19 19 19 20 21M28 21C29 19 32 19 33 21" stroke="#15803D" stroke-width="2.5" stroke-linecap="round"/>
+                                <path class="mouth" d="M18 28C20 32 28 32 30 28" stroke="#15803D" stroke-width="2.5" stroke-linecap="round"/>
+                            </svg>
+                            <span class="text-xs font-extrabold text-slate-800 leading-none">4</span>
+                            <span class="text-[9px] text-slate-500 mt-0.5">ดีมาก</span>
+                        </button>
+
+                        <!-- ระดับ 5: ยอดเยี่ยม -->
+                        <button type="button" onclick="selectAndSaveFeedback(5, 'ยอดเยี่ยม')" data-rate="5" class="rate-card flex flex-col items-center py-2.5 px-1 rounded-2xl border border-slate-200 bg-white cursor-pointer">
+                            <svg class="face-svg w-9 h-9 mb-1.5 overflow-visible" viewBox="0 0 48 48" fill="none">
+                                <circle cx="24" cy="24" r="20" fill="#FEF08A" stroke="#CA8A04" stroke-width="2.5"/>
+                                <circle class="cheek" cx="13" cy="25" r="3" fill="#F87171" opacity="0.55"/>
+                                <circle class="cheek" cx="35" cy="25" r="3" fill="#F87171" opacity="0.55"/>
+                                <path class="eye" d="M15 20C16.5 17.5 19.5 17.5 21 20M27 20C28.5 17.5 31.5 17.5 33 20" stroke="#854D0E" stroke-width="2.5" stroke-linecap="round"/>
+                                <path class="mouth" d="M16 27C16 33 32 33 32 27H16Z" fill="#EF4444" stroke="#854D0E" stroke-width="2" stroke-linejoin="round"/>
+                                <path class="sparkle opacity-0" d="M42 4L43.5 8.5L48 10L43.5 11.5L42 16L40.5 11.5L36 10L40.5 8.5L42 4Z" fill="#F59E0B"/>
+                            </svg>
+                            <span class="text-xs font-extrabold text-slate-800 leading-none">5</span>
+                            <span class="text-[9px] text-slate-500 mt-0.5">ยอดเยี่ยม</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- แถบยืนยันการบันทึกผลประเมิน -->
+                <div id="fbThankArea" class="hidden thank-you-banner py-3 px-4 bg-emerald-50/90 border border-emerald-200 rounded-2xl text-emerald-800 text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
+                    <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white text-[11px]">✓</span>
+                    <span>ขอบคุณสำหรับคะแนนประเมิน <strong id="rateResultTxt" class="text-emerald-950"></strong> ครับ!</span>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -244,34 +466,59 @@
     </div>
 
     <script>
+        // 📌 การเชื่อมต่อของแคมเปญ Shop Monthly Brief
         const LIFF_ID = "1656846002-PxVjjo6A"; 
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw5jv3iGAHdrnvUQR1bC-4IJZhbAEkfDMo2Lli9HLAIiP_LiaWsB0lD-Iy2ohBJiJfS/exec"; 
 
-        async function fetchGAS(action, args = []) {
-            try {
-                const response = await fetch(GAS_WEB_APP_URL, {
-                    method: 'POST', body: JSON.stringify({ action: action, args: args })
-                });
-                const data = await response.json();
-                if (data.error) throw new Error(data.error);
-                return data.result;
-            } catch (err) {
-                console.error("GAS Error:", err); throw err;
+        async function fetchGAS(action, args = [], retries = 3) {
+            for (let attempt = 1; attempt <= retries; attempt++) {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+                try {
+                    const response = await fetch(GAS_WEB_APP_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: action, args: args }),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    const data = await response.json();
+                    if (data.error) throw new Error(data.error);
+                    return data.result;
+                } catch (err) {
+                    clearTimeout(timeoutId);
+                    console.warn(`GAS Error [${action}] (Attempt ${attempt}/${retries}):`, err);
+                    if (attempt === retries) throw err;
+                    
+                    if (action === 'saveQuizResult') {
+                        const loadTxt = document.getElementById('loadingText');
+                        if (loadTxt) loadTxt.innerText = `กำลังส่งคำตอบ... (ลองใหม่อีกครั้ง ${attempt}/${retries - 1})`;
+                    }
+                    await new Promise(r => setTimeout(r, 1500 * attempt));
+                }
             }
         }
 
-        let state = { settings: null, questions: [], answers: [], currIdx: 0, timer: null, timeLeft: 0, user: {} };
+        let state = { 
+            settings: null, questions: [], answers: [], currIdx: 0, timer: null, timeLeft: 0, user: {},
+            isSubmitting: false, isSubmitted: false, isStarting: false,
+            cachedSubmission: null, preloadedQuestionsPromise: null,
+            feedbackLocked: false, feedbackGiven: null
+        };
         let startTime, endTime;
         let userLinePic = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; 
         let currentLineUid = ""; 
 
         window.onload = async () => { 
             try {
-                const settings = await fetchGAS('getQuizSettings');
+                const [settings] = await Promise.all([
+                    fetchGAS('getQuizSettings'),
+                    liff.init({ liffId: LIFF_ID })
+                ]);
                 initData(settings);
 
                 if (!document.getElementById('loginScreen').classList.contains('hidden')) {
-                    await liff.init({ liffId: LIFF_ID }); 
                     if (liff.isLoggedIn()) {
                         const profile = await liff.getProfile();
                         userLinePic = profile.pictureUrl || userLinePic;
@@ -326,6 +573,12 @@
             if(loadingCont) loadingCont.innerHTML = `<p class="text-sm font-bold text-red-500">เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณารีเฟรช</p>`;
         }
 
+        function preloadQuestionsInBackground() {
+            if (!state.preloadedQuestionsPromise) {
+                state.preloadedQuestionsPromise = fetchGAS('getQuizQuestions').catch(() => null);
+            }
+        }
+
         function executeAutoVerify(lineUid) {
             fetchGAS('getEmployeeByLineId', [lineUid]).then(res => {
                 const autoCont = document.getElementById('autoVerifyContainer');
@@ -345,6 +598,7 @@
                     
                     startBtn.disabled = false; startBtn.innerText = "เริ่มทำแบบทดสอบ";
                     startBtn.className = "w-full bg-green-500 text-white py-4 rounded-[1.5rem] font-bold shadow hover:bg-green-600 hover:-translate-y-1 transition transform cursor-pointer mt-4";
+                    preloadQuestionsInBackground();
                 } else {
                     autoCont.classList.add('hidden');
                     manCont.classList.remove('hidden');
@@ -381,6 +635,7 @@
                     const startBtn = document.getElementById('btnStart');
                     startBtn.disabled = false; startBtn.innerText = "เริ่มทำแบบทดสอบ";
                     startBtn.className = "w-full bg-green-500 text-white py-4 rounded-[1.5rem] font-bold shadow hover:bg-green-600 hover:-translate-y-1 transition transform cursor-pointer mt-4";
+                    preloadQuestionsInBackground();
                 } else {
                     document.getElementById('manualIdContainer').classList.add('hidden');
                     document.getElementById('registerContainer').classList.remove('hidden');
@@ -419,53 +674,71 @@
                     const startBtn = document.getElementById('btnStart');
                     startBtn.disabled = false; startBtn.innerText = "เริ่มทำแบบทดสอบ";
                     startBtn.className = "w-full bg-green-500 text-white py-4 rounded-[1.5rem] font-bold shadow hover:bg-green-600 hover:-translate-y-1 transition transform cursor-pointer mt-4";
+                    preloadQuestionsInBackground();
                 } else {
                     alert("เกิดข้อผิดพลาดในการลงทะเบียน: " + res.error);
                 }
             }).catch(alertErr);
         }
 
-        // 📌 ฟังก์ชันเริ่มทำแบบทดสอบ (เพิ่มระบบเช็คจำนวนครั้งโควต้า)
         async function startQuizNow() {
-            if(!state.user.id) return;
+            if(!state.user.id || state.isStarting) return;
+            state.isStarting = true;
+            document.getElementById('loadingText').innerText = "กำลังโหลด...";
             document.getElementById('loadingOverlay').classList.remove('hidden');
             
             try {
-                // 1. ส่งไอดีพนักงานไปเช็คในระบบว่าสอบไปกี่ครั้งแล้ว
                 const res = await fetchGAS('checkUserAttempts', [state.user.id]);
                 const maxAttempts = parseInt(state.settings.maxAttempts) || 1; 
+                state.feedbackGiven = res.feedbackGiven || null;
                 
-                // 2. ถ้าสอบเกินหรือเท่ากับโควต้า ให้บล็อกทันที
                 if (res.attempts >= maxAttempts) {
+                    state.isStarting = false;
                     document.getElementById('loadingOverlay').classList.add('hidden');
-                    document.getElementById('limitCountText').innerText = maxAttempts;
-                    document.getElementById('limitModal').classList.remove('hidden');
-                    document.getElementById('limitModal').classList.add('flex');
+                    
+                    if (res.bestResult) {
+                        const passed = res.bestResult.grade === "ผ่าน" || res.bestResult.percentage >= state.settings.passingPercentage;
+                        showResult(res.bestResult, passed, [], true);
+                    } else {
+                        document.getElementById('limitCountText').innerText = maxAttempts;
+                        document.getElementById('limitModal').classList.remove('hidden');
+                        document.getElementById('limitModal').classList.add('flex');
+                    }
                     return;
                 }
                 
-                // 3. ถ้ายังไม่เกินโควต้า ให้เข้าสอบได้
-                loadQuestions();
-
+                await loadQuestions();
             } catch (err) {
+                state.isStarting = false;
                 document.getElementById('loadingOverlay').classList.add('hidden');
                 alert("เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์: " + err.message);
             }
         }
 
-        // ฟังก์ชันสำหรับปิด Popup แจ้งเตือนสิทธิ์เต็ม
         function closeLimitModal() {
             document.getElementById('limitModal').classList.add('hidden');
             document.getElementById('limitModal').classList.remove('flex');
         }
 
-        function loadQuestions() {
-            fetchGAS('getQuizQuestions').then(qs => {
+        async function loadQuestions() {
+            try {
+                let qs = state.preloadedQuestionsPromise ? await state.preloadedQuestionsPromise : null;
+                if (!qs) qs = await fetchGAS('getQuizQuestions');
+                
                 state.questions = qs.slice(0, state.settings.numberOfQuestions);
                 state.answers = new Array(state.questions.length).fill(null);
-                if(state.questions.length === 0) { alert("ไม่พบข้อสอบ"); return; }
+                if(state.questions.length === 0) { 
+                    state.isStarting = false;
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    alert("ไม่พบข้อสอบ"); 
+                    return; 
+                }
                 setupQuizUI();
-            }).catch(alertErr);
+            } catch (err) {
+                state.isStarting = false;
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                alert("โหลดข้อสอบไม่สำเร็จ กรุณากดเริ่มทำแบบทดสอบอีกครั้ง");
+            }
         }
 
         function setupQuizUI() {
@@ -479,7 +752,11 @@
 
             state.timeLeft = state.settings.timeLimitMinutes * 60; startTime = new Date();
             updateTimer();
-            state.timer = setInterval(() => { state.timeLeft--; updateTimer(); if(state.timeLeft <= 0) submitQuiz(true); }, 1000);
+            state.timer = setInterval(() => { 
+                state.timeLeft--; 
+                updateTimer(); 
+                if(state.timeLeft <= 0) submitQuiz(true); 
+            }, 1000);
 
             const map = document.getElementById('questionMap'); map.innerHTML = '';
             state.questions.forEach((_, i) => { map.innerHTML += `<button id="map-${i}" onclick="jump(${i})" class="w-8 h-8 rounded bg-white border text-gray-500 text-sm hover:border-indigo-400 transition">${i+1}</button>`; });
@@ -487,8 +764,8 @@
         }
 
         function updateTimer() {
-            const m = Math.floor(state.timeLeft / 60).toString().padStart(2,'0');
-            const s = (state.timeLeft % 60).toString().padStart(2,'0');
+            const m = Math.floor(Math.max(0, state.timeLeft) / 60).toString().padStart(2,'0');
+            const s = (Math.max(0, state.timeLeft) % 60).toString().padStart(2,'0');
             const el = document.getElementById('timerDisplay');
             if(el) { el.innerText = `${m}:${s}`; if(state.timeLeft < 60) el.classList.add('timer-urgent'); }
         }
@@ -511,11 +788,16 @@
             updateMap();
         }
 
-        function sel(idx) { state.answers[state.currIdx] = idx; renderQuestion(); }
-        function jump(i) { state.currIdx = i; renderQuestion(); }
+        function sel(idx) { if(state.isSubmitting || state.isSubmitted) return; state.answers[state.currIdx] = idx; renderQuestion(); }
+        function jump(i) { if(state.isSubmitting || state.isSubmitted) return; state.currIdx = i; renderQuestion(); }
         function nav(dir) {
-            if (dir === 1 && state.currIdx >= state.questions.length - 1) { if(confirm("ยืนยันการส่งคำตอบ?")) { submitQuiz(false); } return; } 
-            const newIdx = state.currIdx + dir; if(newIdx >= 0 && newIdx < state.questions.length) { state.currIdx = newIdx; renderQuestion(); }
+            if (state.isSubmitting || state.isSubmitted) return;
+            if (dir === 1 && state.currIdx >= state.questions.length - 1) { 
+                if(confirm("ยืนยันการส่งคำตอบ?")) { submitQuiz(false); } 
+                return; 
+            } 
+            const newIdx = state.currIdx + dir; 
+            if(newIdx >= 0 && newIdx < state.questions.length) { state.currIdx = newIdx; renderQuestion(); }
         }
 
         function updateMap() {
@@ -528,49 +810,195 @@
         }
 
         function submitQuiz(auto) {
-            clearInterval(state.timer); document.getElementById('loadingOverlay').classList.remove('hidden');
-            endTime = new Date(); let score = 0; let incorrectIndices = []; let detailedLog = [];
-            state.questions.forEach((q, i) => {
-                const isCorrect = state.answers[i] === q.correct; if(isCorrect) score++; else incorrectIndices.push(i);
-                const tempDiv = document.createElement("div"); tempDiv.innerHTML = q.question; const cleanQ = (tempDiv.textContent || "").substring(0, 40) + "...";
-                const uAns = state.answers[i] !== null ? q.options[state.answers[i]] : "ไม่ได้ตอบ"; const cAns = q.options[q.correct];
-                let logText = `${isCorrect ? "✅" : "🅧"} [ข้อ ${i+1}] ${cleanQ}\n   ตอบ: ${uAns}`;
-                if(!isCorrect) logText += `\n   (เฉลย: ${cAns})`; detailedLog.push(logText);
+            if (state.isSubmitting || state.isSubmitted) return;
+            state.isSubmitting = true;
+            clearInterval(state.timer);
+
+            const btnNext = document.getElementById('btnNext');
+            if (btnNext) btnNext.disabled = true;
+
+            document.getElementById('loadingText').innerText = "กำลังบันทึกคะแนน...";
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+
+            if (!state.cachedSubmission) {
+                endTime = new Date(); 
+                let score = 0; 
+                let incorrectIndices = []; 
+                let detailedLog = [];
+                state.questions.forEach((q, i) => {
+                    const isCorrect = state.answers[i] === q.correct; 
+                    if(isCorrect) score++; else incorrectIndices.push(i);
+                    const tempDiv = document.createElement("div"); tempDiv.innerHTML = q.question; 
+                    
+                    const cleanQ = (tempDiv.textContent || tempDiv.innerText || "").replace(/\s+/g, " ").trim();
+                    const uAns = (state.answers[i] !== null ? q.options[state.answers[i]] : "ไม่ได้ตอบ").toString().replace(/\s+/g, " ").trim(); 
+                    const cAns = (q.options[q.correct] || "").toString().replace(/\s+/g, " ").trim();
+                    
+                    let logText = `${isCorrect ? "✅" : "🅧"} [ข้อ ${i+1}] ${cleanQ}\n   ตอบ: ${uAns}`;
+                    if(!isCorrect) logText += `\n   (เฉลย: ${cAns})`; 
+                    detailedLog.push(logText);
+                });
+                const pct = Math.round((score / state.questions.length) * 100); 
+                const passed = pct >= state.settings.passingPercentage;
+                const durationSec = Math.max(1, Math.floor((endTime - startTime)/1000)); 
+                const durationStr = `${Math.floor(durationSec/60)}:${(durationSec%60).toString().padStart(2,'0')}`;
+                
+                const result = {
+                    studentId: state.user.id, fullName: state.user.name, score: score, totalQuestions: state.questions.length,
+                    percentage: pct, grade: passed ? "ผ่าน" : "ไม่ผ่าน", duration: durationStr, answerLog: detailedLog.join('\n----------------\n'),
+                    profilePic: userLinePic
+                };
+                state.cachedSubmission = { result, passed, incorrectIndices };
+            }
+
+            const { result, passed, incorrectIndices } = state.cachedSubmission;
+
+            fetchGAS('saveQuizResult', [result], 3).then(() => {
+                state.isSubmitted = true;
+                state.isSubmitting = false;
+                document.getElementById('loadingText').innerText = "กำลังโหลด...";
+                showResult(result, passed, incorrectIndices, false);
+            }).catch((err) => { 
+                state.isSubmitting = false;
+                if (btnNext) btnNext.disabled = false;
+                document.getElementById('loadingText').innerText = "กำลังโหลด...";
+                document.getElementById('loadingOverlay').classList.add('hidden'); 
+                alert("สัญญาณอินเทอร์เน็ตขัดข้องขณะส่งคำตอบ: " + err.message + "\nกรุณากดปุ่ม 'ส่งคำตอบ' อีกครั้งครับ"); 
             });
-            const pct = Math.round((score / state.questions.length) * 100); const passed = pct >= state.settings.passingPercentage;
-            const durationSec = Math.floor((endTime - startTime)/1000); const durationStr = `${Math.floor(durationSec/60)}:${(durationSec%60).toString().padStart(2,'0')}`;
-            
-            const result = {
-                studentId: state.user.id, fullName: state.user.name, score: score, totalQuestions: state.questions.length,
-                percentage: pct, grade: passed ? "ผ่าน" : "ไม่ผ่าน", duration: durationStr, answerLog: detailedLog.join('\n----------------\n'),
-                profilePic: userLinePic
-            };
-            fetchGAS('saveQuizResult', [result]).then(() => showResult(result, passed, incorrectIndices))
-                .catch((err) => { document.getElementById('loadingOverlay').classList.add('hidden'); alert("เกิดข้อผิดพลาดในการส่งคำตอบ: " + err.message + "\nกรุณาลองใหม่อีกครั้ง"); });
         }
 
-        function showResult(res, passed, incorrectIndices) {
-            document.getElementById('loadingOverlay').classList.add('hidden'); const modal = document.getElementById('resultModal');
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-            document.getElementById('resIcon').innerText = passed ? "🏆" : "💪";
+        function showResult(res, passed, incorrectIndices = [], isPastAttempt = false) {
+            document.getElementById('loadingOverlay').classList.add('hidden'); 
+            const modal = document.getElementById('resultModal');
+            modal.classList.remove('hidden'); 
+            modal.classList.add('flex');
+
+            document.getElementById('resProfilePic').src = userLinePic || res.profilePic || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+            document.getElementById('resName').innerText = res.fullName || state.user.name;
+            document.getElementById('resTime').innerText = (res.duration || "0:00") + " นาที";
+
+            const badge = document.getElementById('quotaNoticeBadge');
+            if (badge) {
+                if (isPastAttempt) badge.classList.remove('hidden');
+                else badge.classList.add('hidden');
+            }
+
             document.getElementById('resGrade').innerText = passed ? "ยินดีด้วย! คุณผ่านเกณฑ์" : "พยายามอีกนิด คุณยังไม่ผ่านเกณฑ์";
-            document.getElementById('resGrade').className = passed ? "text-lg font-bold mb-6 text-green-600" : "text-lg font-bold mb-6 text-red-500";
-            document.getElementById('resScore').innerText = `${res.score}/${res.totalQuestions}`; document.getElementById('resName').innerText = res.fullName;
-            document.getElementById('resTime').innerText = res.duration; document.getElementById('resPercent').innerText = res.percentage + "%";
-            const reviewSection = document.getElementById('reviewSection'); const reviewContent = document.getElementById('reviewContent');
-            if (incorrectIndices.length > 0) {
-                reviewSection.classList.remove('hidden'); reviewContent.innerHTML = ''; 
+            document.getElementById('resGrade').className = passed ? "text-sm font-bold mt-0.5 mb-3.5 text-green-600" : "text-sm font-bold mt-0.5 mb-3.5 text-red-500";
+            
+            const totalQ = Number(res.totalQuestions) || (state.settings ? Number(state.settings.numberOfQuestions) : 5);
+            const cleanPct = parseInt((res.percentage !== undefined ? res.percentage : "").toString().replace('%', ''), 10) || Math.round((Number(res.score) / totalQ) * 100);
+            
+            document.getElementById('resScore').innerText = `${res.score}/${totalQ}`; 
+            document.getElementById('resPercent').innerText = cleanPct + "%";
+
+            const reviewSection = document.getElementById('reviewSection'); 
+            const reviewContent = document.getElementById('reviewContent');
+            reviewContent.innerHTML = '';
+
+            let hasWrongAnswers = false;
+
+            if (incorrectIndices && incorrectIndices.length > 0 && state.questions.length > 0) {
+                hasWrongAnswers = true;
+                reviewSection.classList.remove('hidden');
+                reviewSection.classList.add('flex');
                 incorrectIndices.forEach(idx => {
-                    const q = state.questions[idx]; const userAnsIdx = state.answers[idx];
-                    const userAnsText = userAnsIdx !== null ? q.options[userAnsIdx] : "ไม่ได้ตอบ"; const correctAnsText = q.options[q.correct];
-                    const tempDiv = document.createElement("div"); tempDiv.innerHTML = q.question; const questionText = tempDiv.textContent || tempDiv.innerText || "";
-                    const item = document.createElement('div'); item.className = "bg-gray-50 rounded-xl p-4 border border-gray-200 text-sm hover:shadow-sm transition";
-                    item.innerHTML = `<div class="font-bold text-gray-700 mb-2 border-b pb-2 border-gray-200"><span class="text-red-500 mr-1">ข้อที่ ${idx + 1}:</span> ${questionText}</div>
-                        <div class="space-y-1"><div class="text-red-600 flex items-start bg-red-50 p-1 rounded"><span class="mr-2 min-w-[60px] font-bold">🅧 ตอบ:</span> <span>${userAnsText}</span></div>
-                        <div class="text-green-600 flex items-start bg-green-50 p-1 rounded"><span class="mr-2 min-w-[60px] font-bold">✅ ถูก:</span> <span>${correctAnsText}</span></div></div>`;
+                    const q = state.questions[idx]; 
+                    const userAnsIdx = state.answers[idx];
+                    const userAnsText = userAnsIdx !== null ? q.options[userAnsIdx] : "ไม่ได้ตอบ"; 
+                    const correctAnsText = q.options[q.correct];
+                    const tempDiv = document.createElement("div"); tempDiv.innerHTML = q.question; 
+                    const questionText = (tempDiv.textContent || tempDiv.innerText || "").replace(/\s+/g, " ").trim();
+                    
+                    const item = document.createElement('div'); 
+                    item.className = "bg-gray-50 rounded-xl p-3.5 border border-gray-200/80 text-xs hover:shadow-sm transition";
+                    item.innerHTML = `<div class="font-bold text-gray-700 mb-2 border-b pb-1.5 border-gray-200 leading-relaxed"><span class="text-red-500 mr-1">ข้อที่ ${idx + 1}:</span> ${questionText}</div>
+                        <div class="space-y-1">
+                            <div class="text-red-600 flex items-start bg-red-50 p-1.5 rounded-lg"><span class="mr-2 min-w-[48px] font-bold">🅧 ตอบ:</span> <span>${userAnsText}</span></div>
+                            <div class="text-green-600 flex items-start bg-green-50 p-1.5 rounded-lg"><span class="mr-2 min-w-[48px] font-bold">✅ ถูก:</span> <span>${correctAnsText}</span></div>
+                        </div>`;
                     reviewContent.appendChild(item);
                 });
-            } else { reviewSection.classList.add('hidden'); }
+            } 
+            else if (isPastAttempt && res.answerLog) {
+                const blocks = res.answerLog.split('----------------').map(b => b.trim()).filter(b => b.startsWith('🅧'));
+                if (blocks.length > 0) {
+                    hasWrongAnswers = true;
+                    reviewSection.classList.remove('hidden');
+                    reviewSection.classList.add('flex');
+                    blocks.forEach(block => {
+                        const lines = block.split('\n').map(l => l.trim());
+                        const headerMatch = lines[0].match(/\[ข้อ\s*(\d+)\]\s*(.*)/);
+                        const qNum = headerMatch ? headerMatch[1] : "";
+                        const qTitle = headerMatch ? headerMatch[2] : lines[0].replace('🅧', '').trim();
+                        const uAns = lines[1] ? lines[1].replace(/^ตอบ:\s*/, '') : "-";
+                        const cAns = lines[2] ? lines[2].replace(/^\(เฉลย:\s*/, '').replace(/\)$/, '') : "-";
+
+                        const item = document.createElement('div'); 
+                        item.className = "bg-gray-50 rounded-xl p-3.5 border border-gray-200/80 text-xs hover:shadow-sm transition";
+                        item.innerHTML = `<div class="font-bold text-gray-700 mb-2 border-b pb-1.5 border-gray-200 leading-relaxed"><span class="text-red-500 mr-1">ข้อที่ ${qNum}:</span> ${qTitle}</div>
+                            <div class="space-y-1">
+                                <div class="text-red-600 flex items-start bg-red-50 p-1.5 rounded-lg"><span class="mr-2 min-w-[48px] font-bold">🅧 ตอบ:</span> <span>${uAns}</span></div>
+                                <div class="text-green-600 flex items-start bg-green-50 p-1.5 rounded-lg"><span class="mr-2 min-w-[48px] font-bold">✅ ถูก:</span> <span>${cAns}</span></div>
+                            </div>`;
+                        reviewContent.appendChild(item);
+                    });
+                } else {
+                    reviewSection.classList.add('hidden');
+                    reviewSection.classList.remove('flex');
+                }
+            } else { 
+                reviewSection.classList.add('hidden'); 
+                reviewSection.classList.remove('flex');
+            }
+
+            // 📌 แสดงส่วนประเมินความพึงพอใจ เฉพาะกรณีที่ได้คะแนนเต็ม 100% เท่านั้น
+            const fbSection = document.getElementById('feedbackSection');
+            const isFullScore = (cleanPct >= 100) || 
+                                (Number(res.score) > 0 && Number(res.score) >= totalQ) || 
+                                (passed && !hasWrongAnswers && Number(res.score) > 0);
+
+            if (isFullScore) {
+                fbSection.classList.remove('hidden');
+                if (state.feedbackGiven) {
+                    document.getElementById('rateResultTxt').innerText = `ระดับ ${state.feedbackGiven.rating} (${state.feedbackGiven.ratingText})`;
+                    document.getElementById('fbFormArea').classList.add('hidden');
+                    document.getElementById('fbThankArea').classList.remove('hidden');
+                } else {
+                    state.feedbackLocked = false;
+                    document.querySelectorAll('#fbFormArea [data-rate]').forEach(b => b.classList.remove('active', 'dimmed'));
+                    document.getElementById('fbThankArea').classList.add('hidden');
+                    document.getElementById('fbFormArea').classList.remove('hidden');
+                }
+            } else {
+                fbSection.classList.add('hidden');
+            }
+        }
+
+        function selectAndSaveFeedback(val, label) {
+            if (state.feedbackLocked) return;
+            state.feedbackLocked = true;
+
+            document.querySelectorAll('#fbFormArea [data-rate]').forEach(btn => {
+                if (Number(btn.dataset.rate) === val) btn.classList.add('active');
+                else btn.classList.add('dimmed');
+            });
+
+            const payload = {
+                studentId: state.user.id,
+                fullName: state.user.name,
+                department: state.user.dept || "-",
+                rating: val,
+                ratingText: label
+            };
+            state.feedbackGiven = { rating: val, ratingText: label };
+            fetchGAS('saveUserFeedback', [payload], 2).catch(err => console.warn("Feedback Save Error:", err));
+
+            setTimeout(() => {
+                document.getElementById('rateResultTxt').innerText = `ระดับ ${val} (${label})`;
+                document.getElementById('fbFormArea').classList.add('hidden');
+                document.getElementById('fbThankArea').classList.remove('hidden');
+            }, 1050);
         }
 
         function openLeaderboard() {
@@ -590,7 +1018,7 @@
                         top3Html += `<div class="flex flex-col items-center relative transition-transform hover:-translate-y-1 duration-300 podium-enter ${cf.margin}">
                             <div class="${cf.medalSize} drop-shadow-md mb-[-1.5rem] z-40 relative">${cf.medal}</div>
                             <div class="bg-white w-full ${cf.cardHeight} rounded-2xl ${cf.borderTop} ${cf.shadow} flex flex-col items-center pt-8 pb-4 px-2 relative overflow-hidden">
-                                <img src="${p.profilePic}" class="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover mb-3 ${cf.avatarRing} shadow-inner bg-white">
+                                <img src="${p.profilePic}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'" class="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover mb-3 ${cf.avatarRing} shadow-inner bg-white">
                                 <div class="w-full px-1 flex items-center justify-center min-h-[3rem] mb-1"><div class="${cf.nameSize} font-bold text-gray-800 leading-tight text-center break-words w-full">${p.name}</div></div>
                                 <div class="font-black ${cf.scoreSize} ${cf.scoreColor} tracking-tight leading-none">${p.score}</div>
                                 <div class="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-2">Score</div>
@@ -605,7 +1033,7 @@
                     rest.forEach((row, idx) => {
                         listHtml += `<div class="flex items-center p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:border-indigo-200 transition group podium-enter" style="animation-delay: ${0.3 + (idx * 0.05)}s">
                             <div class="w-8 text-center font-bold text-gray-400 text-sm">#${idx + 4}</div>
-                            <img src="${row.profilePic}" class="mx-3 w-8 h-8 rounded-full object-cover shrink-0 border border-gray-200 bg-white">
+                            <img src="${row.profilePic}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'" class="mx-3 w-8 h-8 rounded-full object-cover shrink-0 border border-gray-200 bg-white">
                             <div class="flex-grow min-w-0"><div class="font-bold text-gray-700 truncate text-sm">${row.name}</div><div class="text-[10px] text-gray-400 flex items-center gap-1"><span>⏱️</span> ${row.durationStr}</div></div>
                             <div class="text-right"><div class="font-bold text-indigo-600 text-lg">${row.score}</div></div></div>`;
                     });
